@@ -16,6 +16,7 @@
 
 <script lang="ts">
 	import { format, differenceInDays, isPast } from 'date-fns';
+	import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 
 	export let contracts: Contract[];
 
@@ -29,6 +30,8 @@
 
 	let sortColumn: SortableColumn | null = 'start_date'; // Default sort by Start Date
 	let sortDirection: 'asc' | 'desc' = 'desc'; // Default to descending (newest first)
+
+	const BUCKET_NAME = 'contract-files';
 
 	function handleSort(column: SortableColumn) {
 		if (sortColumn === column) {
@@ -183,7 +186,9 @@
 				<td>
 					<div class="actions-wrapper">
 						{#if contract.file_path}
-							<a href={contract.file_path} target="_blank" rel="noopener noreferrer" class="file-link">View File</a>
+							<a href="{PUBLIC_SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{contract.file_path}" target="_blank" rel="noopener noreferrer" class="file-link"
+								>View File</a
+							>
 						{/if}
 						<a href="/contracts/{contract.id}" class="details-link">More</a>
 					</div>
