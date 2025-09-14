@@ -26,6 +26,7 @@
 		| 'start_date'
 		| 'end_date'
 		| 'contract_value'
+		| 'renewal_type'
 		| 'status';
 
 	let sortColumn: SortableColumn | null = 'start_date'; // Default sort by Start Date

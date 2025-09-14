@@ -100,6 +100,11 @@
 		(c: Contract) => c.contract_type !== 'Insurance' && c.contract_type !== 'Subscription'
 	);
 
+	// Check if any contracts of each type exist in the original unfiltered data
+	$: hasAnyInsuranceContracts = data.contracts.some((c) => c.contract_type === 'Insurance');
+	$: hasAnySubscriptionContracts = data.contracts.some((c) => c.contract_type === 'Subscription');
+	$: hasAnyOtherContracts = data.contracts.some((c) => c.contract_type !== 'Insurance' && c.contract_type !== 'Subscription');
+
 	function clearFilters() {
 		searchTerm = '';
 		statusFilter = 'all';
@@ -188,8 +193,14 @@
 	{#if typeFilter === 'all' || typeFilter === 'Insurance'}
 		<section>
 			<h2>Insurance</h2>
-			{#if insuranceContracts.length > 0}
-				<ContractTable contracts={insuranceContracts} />
+			{#if hasAnyInsuranceContracts}
+				{#if insuranceContracts.length > 0}
+					<ContractTable contracts={insuranceContracts} />
+				{:else}
+					<p class="empty-section-placeholder">No Insurance contracts match the current filters.</p>
+				{/if}
+			{:else}
+				<p class="empty-section-placeholder">No 'Insurance' contracts have been added yet.</p>
 			{/if}
 		</section>
 	{/if}
@@ -197,8 +208,14 @@
 	{#if typeFilter === 'all' || typeFilter === 'Subscription'}
 		<section>
 			<h2>Subscriptions</h2>
-			{#if subscriptionContracts.length > 0}
-				<ContractTable contracts={subscriptionContracts} />
+			{#if hasAnySubscriptionContracts}
+				{#if subscriptionContracts.length > 0}
+					<ContractTable contracts={subscriptionContracts} />
+				{:else}
+					<p class="empty-section-placeholder">No Subscription contracts match the current filters.</p>
+				{/if}
+			{:else}
+				<p class="empty-section-placeholder">No 'Subscription' contracts have been added yet.</p>
 			{/if}
 		</section>
 	{/if}
@@ -206,8 +223,14 @@
 	{#if typeFilter === 'all' || typeFilter === 'Other'}
 		<section>
 			<h2>Other</h2>
-			{#if otherContracts.length > 0}
-				<ContractTable contracts={otherContracts} />
+			{#if hasAnyOtherContracts}
+				{#if otherContracts.length > 0}
+					<ContractTable contracts={otherContracts} />
+				{:else}
+					<p class="empty-section-placeholder">No "Other" contracts match the current filters.</p>
+				{/if}
+			{:else}
+				<p class="empty-section-placeholder">No 'Other' contracts have been added yet.</p>
 			{/if}
 		</section>
 	{/if}
@@ -352,6 +375,15 @@
 		background-color: #5a6268;
 	}
 
+	.empty-section-placeholder {
+		text-align: center;
+		color: #777;
+		font-style: italic;
+		padding: 2rem;
+		border: 1px dashed #ddd;
+		border-radius: 8px;
+		margin-top: 1rem;
+	}
 	/* --- Responsive Styles --- */
 	@media (max-width: 768px) {
 		.controls-container {
