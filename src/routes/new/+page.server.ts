@@ -1,4 +1,4 @@
-import { supabase } from '$lib/supabaseClient.ts';
+import { supabase } from '$lib/server/supabase.ts';
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
