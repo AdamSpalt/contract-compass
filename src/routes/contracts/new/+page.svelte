@@ -1,10 +1,23 @@
+<!--
+  This file represents the page for adding a new contract to the system.
+  It contains a form with various fields for contract details, which is
+  submitted to a server action for processing.
+-->
+
 <script lang="ts">
+	// SECTION 1: SCRIPT LOGIC
+	// This section handles the component's state and properties.
+
 	import type { ActionData } from './$types.ts';
+	// The `form` prop receives data back from the server action, like validation errors or success messages.
 	export let form: ActionData;
 
+	// This local state variable controls which date-related fields are shown in the form.
 	let endDateType: 'specific' | 'monthly' | 'yearly' = 'specific'; // 'specific' means it does not renew
 </script>
 
+<!-- SECTION 2: HTML STRUCTURE & DISPLAY -->
+<!-- This section defines the visual layout of the page, including the form for data entry. -->
 <main>
 	<h1>Add New Contract</h1>
 	<a href="/" class="back-link">&larr; Back to Dashboard</a>
@@ -92,6 +105,8 @@
 	</form>
 </main>
 
+<!-- SECTION 3: STYLING -->
+<!-- This section contains all the CSS rules to style the form and layout of the page. -->
 <style>
 	main {
 		max-width: 600px;

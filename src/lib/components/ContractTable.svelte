@@ -1,4 +1,7 @@
 <script context="module" lang="ts">
+	// SECTION 1: DATA DEFINITION
+	// This script block defines the "shape" of a single contract object using TypeScript.
+	// It ensures that any data passed to this component has the correct properties and types.
 	export type Contract = {
 		id: number;
 		contract_name: string | null;
@@ -15,12 +18,18 @@
 </script>
 
 <script lang="ts">
+	// SECTION 2: COMPONENT LOGIC
+	// This script block contains all the interactive logic for the component.
+
 	import { format, differenceInDays, isPast } from 'date-fns';
 	import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 
+	// This is a "prop" - it's the data that gets passed into this component from its parent.
+	// In this case, it's an array of contract objects.
 	export let contracts: Contract[];
 
 	type SortableColumn =
+		// Defines which columns in the table can be sorted.
 		| 'contract_name'
 		| 'vendor_name'
 		| 'start_date'
@@ -29,12 +38,14 @@
 		| 'renewal_type'
 		| 'status';
 
+	// These variables keep track of the current sorting state.
 	let sortColumn: SortableColumn | null = 'start_date'; // Default sort by Start Date
 	let sortDirection: 'asc' | 'desc' = 'desc'; // Default to descending (newest first)
 
 	const BUCKET_NAME = 'contract-files';
 
 	function handleSort(column: SortableColumn) {
+		// This function is called when a user clicks on a column header to sort the table.
 		if (sortColumn === column) {
 			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
 		} else {
@@ -43,7 +54,9 @@
 		}
 	}
 
-	// This is a computed property. It will re-run whenever its dependencies (contracts, sortColumn, sortDirection) change.
+	// This is a "reactive statement" or "computed property".
+	// It automatically re-calculates the `sortedContracts` array whenever the original
+	// `contracts` list, `sortColumn`, or `sortDirection` changes.
 	$: sortedContracts = (() => {
 		if (!sortColumn) {
 			return contracts;
@@ -51,6 +64,7 @@
 
 		// Create a new sorted array without modifying the original 'contracts' prop
 		return [...contracts].sort((a, b) => {
+			// Helper function to get the correct value for sorting, handling special cases.
 			const getSortableValue = (contract: Contract, key: SortableColumn) => {
 				switch (key) {
 					case 'status':
@@ -84,6 +98,8 @@
 		});
 	})();
 
+	// This function calculates the status of a contract (e.g., Active, Expired)
+	// based on its dates and returns the text and a CSS class for styling.
 	function getContractStatus(contract: Contract) {
 		let status: { text: string; className: string } = { text: 'Active', className: 'status-active' };
 
@@ -105,8 +121,12 @@
 	}
 </script>
 
+<!-- SECTION 3: HTML STRUCTURE & DISPLAY -->
+<!-- This section defines the visual layout of the table. -->
 <table>
 	<thead>
+		<!-- Table Headers -->
+		<!-- Each `th` (table header) is clickable to trigger the sorting logic. -->
 		<tr>
 			<th on:click={() => handleSort('contract_name')} class="sortable" class:active-sort={sortColumn === 'contract_name'}>
 				Contract Name
@@ -140,6 +160,8 @@
 		</tr>
 	</thead>
 	<tbody>
+		<!-- Table Body -->
+		<!-- This `{#each}` block loops through the `sortedContracts` array and creates a table row `<tr>` for each contract. -->
 		{#each sortedContracts as contract (contract.id)}
 			{@const status = getContractStatus(contract)}
 			<tr>
@@ -147,6 +169,7 @@
 				<td>{contract.vendor_name ?? 'N/A'}</td>
 				<td>
 					{#if contract.start_date}
+						<!-- Dates are formatted for readability using the 'date-fns' library. -->
 						{format(new Date(contract.start_date + 'T00:00:00'), 'MMM d, yyyy')}
 					{:else}
 						N/A
@@ -174,6 +197,7 @@
 				</td>
 				<td>
 					{#if contract.contract_value}
+						<!-- Currency is formatted correctly for the Polish locale. -->
 						{new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(
 							contract.contract_value
 						)}
@@ -182,10 +206,12 @@
 					{/if}
 				</td>
 				<td>
+					<!-- The status badge gets its text and color from the `getContractStatus` function. -->
 					<span class="status-badge {status.className}">{status.text}</span>
 				</td>
 				<td>
 					<div class="actions-wrapper">
+						<!-- Action buttons to view the contract file or see more details. -->
 						{#if contract.file_path}
 							<a href="{PUBLIC_SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{contract.file_path}" target="_blank" rel="noopener noreferrer" class="file-link"
 								>View File</a
@@ -199,6 +225,8 @@
 	</tbody>
 </table>
 
+<!-- SECTION 4: STYLING -->
+<!-- This section contains all the CSS rules to make the table look good. -->
 <style>
 	table {
 		width: 100%;
