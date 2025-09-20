@@ -1,23 +1,10 @@
-<!--
-  This file represents the page for adding a new contract to the system.
-  It contains a form with various fields for contract details, which is
-  submitted to a server action for processing.
--->
-
 <script lang="ts">
-	// SECTION 1: SCRIPT LOGIC
-	// This section handles the component's state and properties.
-
-	import type { ActionData } from './$types.ts';
-	// The `form` prop receives data back from the server action, like validation errors or success messages.
+	import type { ActionData } from './$types';
 	export let form: ActionData;
 
-	// This local state variable controls which date-related fields are shown in the form.
-	let endDateType: 'specific' | 'monthly' | 'yearly' = 'specific'; // 'specific' means it does not renew
+	let endDateType: 'specific' | 'monthly' | 'yearly' = 'specific';
 </script>
 
-<!-- SECTION 2: HTML STRUCTURE & DISPLAY -->
-<!-- This section defines the visual layout of the page, including the form for data entry. -->
 <main>
 	<h1>Add New Contract</h1>
 	<a href="/" class="back-link">&larr; Back to Dashboard</a>
@@ -49,7 +36,7 @@
 
 		<h4>Financial Details</h4>
 		<div class="form-group">
-			<label for="contract_value">Contract Value (PLN)</label>
+			<label for="contract_value">Contract Value ($)</label>
 			<input type="number" step="0.01" id="contract_value" name="contract_value" placeholder="e.g. 1500" />
 		</div>
 
@@ -75,21 +62,23 @@
 			<input type="date" id="start_date" name="start_date" />
 		</div>
 
-		{#if endDateType === 'specific'}
 		<div class="form-group">
-			<label for="end_date">End Date</label>
-			<input type="date" id="end_date" name="end_date" />
-		</div>
-		{/if}
-
-		<div class="form-group">
-			<label for="renewal-type-group">Renewal</label>
-			<div class="radio-group" id="renewal-type-group">
-				<label><input type="radio" name="endDateType" bind:group={endDateType} value="specific" /> Does Not Renew</label>
-				<label><input type="radio" name="endDateType" bind:group={endDateType} value="monthly" /> Renews Monthly</label>
-				<label><input type="radio" name="endDateType" bind:group={endDateType} value="yearly" /> Renews Yearly</label>
+			<label>Renewal / End Date</label>
+			<div class="radio-group">
+				<label><input type="radio" bind:group={endDateType} value="specific" /> Specific Date</label>
+				<label><input type="radio" bind:group={endDateType} value="monthly" /> Renews Monthly</label>
+				<label><input type="radio" bind:group={endDateType} value="yearly" /> Renews Yearly</label>
 			</div>
 		</div>
+
+		{#if endDateType === 'specific'}
+			<div class="form-group">
+				<label for="end_date">End Date</label>
+				<input type="date" id="end_date" name="end_date" />
+			</div>
+		{/if}
+
+		<input type="hidden" name="renewal_type" value={endDateType === 'specific' ? '' : endDateType} />
 
 		<div class="form-group">
 			<label for="contract_file">Contract File (Optional)</label>
@@ -105,8 +94,6 @@
 	</form>
 </main>
 
-<!-- SECTION 3: STYLING -->
-<!-- This section contains all the CSS rules to style the form and layout of the page. -->
 <style>
 	main {
 		max-width: 600px;
