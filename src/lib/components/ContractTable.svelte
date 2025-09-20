@@ -1,3 +1,5 @@
+<!-- Dashboard table structure - column sorting-->
+
 <script context="module" lang="ts">
 	// SECTION 1: DATA DEFINITION
 	// This script block defines the "shape" of a single contract object using TypeScript.

@@ -1,3 +1,7 @@
+<!-- serves as the main dashboard for your "Contract Compass" application. 
+ Its primary purpose is to display contracts to the user and provide a powerful 
+ set of tools for searching, filtering, and organizing them.-->
+
 <script lang="ts">
 	// This 'data' prop is automatically passed from your +page.ts load function
 	import ContractTable from '$lib/components/ContractTable.svelte';
