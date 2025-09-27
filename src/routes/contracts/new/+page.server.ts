@@ -32,7 +32,7 @@ export const actions: Actions = {
 			vendor_name: formData.get('vendor_name') as string,
 			contract_number: formData.get('contract_number') as string,
 			start_date: formData.get('start_date') || null,
-			end_date: renewalType === 'specific' ? endDate || null : null,
+			end_date: endDate || null,
 			renewal_type: renewalType || null,
 			file_path: filePath,
 			contract_value: contractValue ? Number(contractValue) : null,

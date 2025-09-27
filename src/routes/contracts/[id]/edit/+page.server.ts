@@ -36,6 +36,8 @@ export const actions: Actions = {
 		// --- Update Logic ---
 		const contractValue = formData.get('contract_value');
 		const noticePeriod = formData.get('notice_period_days');
+		const renewalType = formData.get('renewal_type') as string;
+		const endDate = formData.get('end_date') as string;
 
 		const { error: updateError } = await supabase
 			.from('contracts')
@@ -45,6 +47,8 @@ export const actions: Actions = {
 				vendor_name: formData.get('vendor_name') as string,
 				contract_number: formData.get('contract_number') as string,
 				start_date: startDate || null,
+				end_date: endDate || null,
+				renewal_type: renewalType || null,
 				contract_value: contractValue ? Number(contractValue) : null,
 				payment_terms: formData.get('payment_terms') as string,
 				notice_period_days: noticePeriod ? Number(noticePeriod) : null

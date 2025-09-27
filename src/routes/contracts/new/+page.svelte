@@ -1,8 +1,14 @@
 <script lang="ts">
 	import type { ActionData } from './$types';
+	import { addYears, format } from 'date-fns';
 	export let form: ActionData;
 
 	let endDateType: 'specific' | 'monthly' | 'yearly' = 'specific';
+	let startDate: string = '';
+
+	// Reactively calculate the end date if 'yearly' is selected and a start date exists
+	$: calculatedEndDate =
+		endDateType === 'yearly' && startDate ? format(addYears(new Date(startDate), 1), 'yyyy-MM-dd') : '';
 </script>
 
 <main>
@@ -59,7 +65,7 @@
 		<h4>Dates & Renewal</h4>
 		<div class="form-group">
 			<label for="start_date">Start Date</label>
-			<input type="date" id="start_date" name="start_date" />
+			<input type="date" id="start_date" name="start_date" bind:value={startDate} />
 		</div>
 
 		<div class="form-group">
@@ -75,6 +81,21 @@
 			<div class="form-group">
 				<label for="end_date">End Date</label>
 				<input type="date" id="end_date" name="end_date" />
+			</div>
+		{/if}
+
+		{#if endDateType === 'yearly'}
+			<div class="form-group">
+				<label for="end_date_yearly">Calculated End Date</label>
+				<input
+					type="date"
+					id="end_date_yearly"
+					name="end_date"
+					value={calculatedEndDate}
+					readonly
+					class="readonly-input"
+					required={!!startDate}
+				/>
 			</div>
 		{/if}
 
@@ -131,6 +152,10 @@
 		font-size: 1rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
+	}
+	.readonly-input {
+		background-color: #f0f0f0;
+		cursor: not-allowed;
 	}
 	.radio-group {
 		display: flex;

@@ -4,22 +4,25 @@
 	const { contract, supabaseUrl } = data;
 
 	let status: { text: string; className: string } = { text: 'Active', className: 'status-active' };
-	let terminationDeadline: Date | null = null;
-	if (contract.renewal_type) {
-		status = { text: 'Auto-Renews', className: 'status-renews' };
-	} else if (contract.end_date) {
-		// Add T00:00:00 to ensure date is parsed in local timezone, not UTC
+	let terminationDeadline: Date | null = null; // Must Cancel By date
+
+	if (contract.end_date) {
 		const endDate = new Date(contract.end_date + 'T00:00:00');
+		const daysUntilExpiry = differenceInDays(endDate, new Date());
+
+		// Calculate "Must Cancel By" date only for yearly renewing contracts
+		if (contract.renewal_type === 'yearly' && contract.notice_period_days) {
+			terminationDeadline = subDays(endDate, contract.notice_period_days);
+		}
+
 		if (isPast(endDate)) {
 			status = { text: 'Expired', className: 'status-expired' };
+		} else if (daysUntilExpiry <= (contract.notice_period_days ?? 30)) {
+			status = { text: 'Expiring Soon', className: 'status-expiring' };
+		} else if (contract.renewal_type) {
+			status = { text: 'Auto-Renews', className: 'status-renews' };
 		} else {
-			if (contract.notice_period_days) {
-				terminationDeadline = subDays(endDate, contract.notice_period_days);
-			}
-			const daysUntilExpiry = differenceInDays(endDate, new Date());
-			if (daysUntilExpiry <= (contract.notice_period_days ?? 30)) {
-				status = { text: 'Expiring Soon', className: 'status-expiring' };
-			}
+			// It's just a normal active contract
 		}
 	}
 </script>

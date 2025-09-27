@@ -1,14 +1,22 @@
 <script lang="ts">
 	import type { ActionData } from './$types';
+	import { addYears, format } from 'date-fns';
 	export let data;
 	export let form: ActionData;
 
 	const { contract } = data;
 
+	// Initialize startDate from contract data
+	let startDate: string = contract.start_date ?? '';
+
 	// Initialize the radio button state based on the loaded data
 	let endDateType: 'specific' | 'monthly' | 'yearly' = contract.renewal_type
 		? contract.renewal_type
 		: 'specific';
+
+	// Reactively calculate the end date if 'yearly' is selected and a start date exists
+	$: calculatedEndDate =
+		endDateType === 'yearly' && startDate ? format(addYears(new Date(startDate), 1), 'yyyy-MM-dd') : contract.end_date ?? '';
 </script>
 
 <main>
@@ -38,7 +46,7 @@
 		</div>
 		<div class="form-group">
 			<label for="start_date">Start Date</label>
-			<input type="date" id="start_date" name="start_date" value={contract.start_date ?? ''} />
+			<input type="date" id="start_date" name="start_date" bind:value={startDate} />
 		</div>
 
 		<hr />
@@ -75,6 +83,21 @@
 			<div class="form-group">
 				<label for="end_date">End Date</label>
 				<input type="date" id="end_date" name="end_date" value={contract.end_date ?? ''} />
+			</div>
+		{/if}
+
+		{#if endDateType === 'yearly'}
+			<div class="form-group">
+				<label for="end_date_yearly">Calculated End Date</label>
+				<input
+					type="date"
+					id="end_date_yearly"
+					name="end_date"
+					value={calculatedEndDate}
+					readonly
+					class="readonly-input"
+					required={!!startDate}
+				/>
 			</div>
 		{/if}
 
@@ -128,6 +151,10 @@
 		border: 1px solid #ccc;
 		border-radius: 4px;
 	}
+	.readonly-input {
+		background-color: #f0f0f0;
+		cursor: not-allowed;
+	}
 	.radio-group {
 		display: flex;
 		gap: 1.5rem;
@@ -159,5 +186,8 @@
 	.error {
 		color: red;
 		margin-top: 1rem;
+	}
+	.error-details {
+		color: #555;
 	}
 </style>
