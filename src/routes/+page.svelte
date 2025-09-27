@@ -5,6 +5,7 @@
 <script lang="ts">
 	// This 'data' prop is automatically passed from your +page.ts load function
 	import ContractTable from '$lib/components/ContractTable.svelte';
+	import StatCard from '$lib/components/StatCard.svelte';
 	import type { Contract } from '$lib/components/ContractTable.svelte';
 	import { isPast, differenceInDays } from 'date-fns';
 
@@ -46,6 +47,33 @@
 		return { ...c, status: currentStatus };
 	});
 
+	// --- Dashboard Indicators ---
+	$: activeContractsCount = contractsWithStatus.filter(
+		(c) => c.status !== 'Expired'
+	).length;
+	$: actionRequiredCount = contractsWithStatus.filter(
+		(c) => c.status === 'Expiring Soon' || c.status === 'Renewing Soon'
+	).length;
+	$: expiredContractsCount = contractsWithStatus.filter((c) => c.status === 'Expired').length;
+	$: monthlyRecurringCost = contractsWithStatus
+		.filter((c) => c.status !== 'Expired' && c.payment_terms === 'monthly' && c.contract_value)
+		.reduce((total, contract) => {
+			return total + contract.contract_value;
+		}, 0);
+	$: next30DayRenewalValue = contractsWithStatus
+		.filter((c) => {
+			if (c.status === 'Expired' || !c.end_date || !c.contract_value) {
+				return false;
+			}
+			const daysUntilExpiry = differenceInDays(new Date(c.end_date + 'T00:00:00'), new Date());
+			// Include contracts ending today up to 30 days from now.
+			return daysUntilExpiry >= 0 && daysUntilExpiry <= 30;
+		})
+		.reduce((total, contract) => total + contract.contract_value, 0);
+	$: totalActiveValue = contractsWithStatus
+		.filter((c) => c.status !== 'Expired' && c.contract_value)
+		.reduce((total, contract) => total + contract.contract_value, 0);
+
 	$: filteredContracts = contractsWithStatus.filter((c) => {
 		// 1. Search Term Filter
 		const lowerSearchTerm = searchTerm.toLowerCase().trim();
@@ -56,7 +84,15 @@
 		}
 
 		// 2. Status Filter
-		if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+		if (statusFilter !== 'all') {
+			if (statusFilter === 'action-required') {
+				if (c.status !== 'Expiring Soon' && c.status !== 'Renewing Soon') return false;
+			} else if (statusFilter === 'active-contracts') {
+				if (c.status === 'Expired') return false;
+			} else if (c.status !== statusFilter) {
+				return false;
+			}
+		}
 
 		// 3. Type Filter
 		if (typeFilter !== 'all') {
@@ -131,6 +167,49 @@
 
 	<p>A central place to manage all your important contracts.</p>
 
+	<div class="stats-container">
+		<StatCard
+			value={activeContractsCount}
+			label="Active Contracts"
+			clickable={true}
+			on:click={() => (statusFilter = 'active-contracts')}
+			tooltipText="The total number of contracts that have not expired."
+		/>
+		<StatCard
+			value={actionRequiredCount}
+			label="Action Required"
+			highlightColor="#ffc107"
+			clickable={true}
+			on:click={() => (statusFilter = 'action-required')}
+			tooltipText="Contracts that are either expiring or renewing soon and may require attention."
+		/>
+		<StatCard
+			value={expiredContractsCount}
+			label="Expired Contracts"
+			highlightColor="#dc3545"
+			clickable={true}
+			on:click={() => (statusFilter = 'Expired')}
+			tooltipText="The total number of contracts that have passed their end date."
+		/>
+	</div>
+	<div class="stats-container">
+		<StatCard
+			value={new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(monthlyRecurringCost)}
+			label="Monthly Recurring Cost"
+			tooltipText="The sum of all active contracts with monthly payment terms. This shows your baseline monthly operational spend."
+		/>
+		<StatCard
+			value={new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(next30DayRenewalValue)}
+			label="Next 30-Day Renewal Value"
+			tooltipText="The total value of all contracts ending within the next 30 days. This helps forecast upcoming payments and renewal decisions."
+		/>
+		<StatCard
+			value={new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(totalActiveValue)}
+			label="Total Value of Active Contracts"
+			tooltipText="The simple sum of the contract value for all active contracts, regardless of their payment terms."
+		/>
+	</div>
+
 	<div class="controls-container">
 		<input
 			type="text"
@@ -178,6 +257,8 @@
 					<label for="status-filter">Status</label>
 					<select id="status-filter" bind:value={statusFilter}>
 						<option value="all">All Statuses</option>
+						<option value="active-contracts">All Active</option>
+						<option value="action-required">Action Required</option>
 						<option value="Active">Active</option>
 						<option value="Expiring Soon">Expiring Soon</option>
 						<option value="Expired">Expired</option>
@@ -264,6 +345,12 @@
 		margin: 2rem auto;
 		padding: 1.5rem;
 		font-family: sans-serif;
+	}
+	.stats-container {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 1.5rem;
+		margin: 2rem 0;
 	}
 	.controls-container {
 		display: flex;
