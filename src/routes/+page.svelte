@@ -74,6 +74,16 @@
 		.filter((c) => c.status !== 'Expired' && c.contract_value)
 		.reduce((total, contract) => total + contract.contract_value, 0);
 
+	$: areFiltersActive =
+		searchTerm !== '' ||
+		statusFilter !== 'all' ||
+		typeFilter !== 'all' ||
+		hasFile !== false ||
+		startDateFilter !== '' ||
+		endDateFilter !== '' ||
+		minValueFilter !== '' ||
+		maxValueFilter !== '';
+
 	$: filteredContracts = contractsWithStatus.filter((c) => {
 		// 1. Search Term Filter
 		const lowerSearchTerm = searchTerm.toLowerCase().trim();
@@ -172,6 +182,7 @@
 			value={activeContractsCount}
 			label="Active Contracts"
 			clickable={true}
+			active={statusFilter === 'active-contracts'}
 			on:click={() => (statusFilter = 'active-contracts')}
 			tooltipText="The total number of contracts that have not expired."
 		/>
@@ -180,6 +191,7 @@
 			label="Action Required"
 			highlightColor="#ffc107"
 			clickable={true}
+			active={statusFilter === 'action-required'}
 			on:click={() => (statusFilter = 'action-required')}
 			tooltipText="Contracts that are either expiring or renewing soon and may require attention."
 		/>
@@ -188,6 +200,7 @@
 			label="Expired Contracts"
 			highlightColor="#dc3545"
 			clickable={true}
+			active={statusFilter === 'Expired'}
 			on:click={() => (statusFilter = 'Expired')}
 			tooltipText="The total number of contracts that have passed their end date."
 		/>
@@ -221,8 +234,11 @@
 
 	<div class="filter-toggle-container">
 		<button class="filter-toggle-button" on:click={() => (showFilters = !showFilters)}>
-			Filters {showFilters ? '▲' : '▼'}
+			{showFilters ? 'Hide' : 'Show'} Filters {showFilters ? '▲' : '▼'}
 		</button>
+		{#if areFiltersActive}
+			<button class="clear-filters-button" on:click={clearFilters}>Clear All Filters</button>
+		{/if}
 	</div>
 
 	{#if showFilters}
@@ -384,6 +400,9 @@
 	}
 	.filter-toggle-container {
 		margin-bottom: 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
 	}
 	.filter-toggle-button {
 		background-color: transparent;

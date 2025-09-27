@@ -4,9 +4,10 @@
 	export let highlightColor: string | null = null;
 	export let clickable = false;
 	export let tooltipText: string | null = null;
+	export let active = false;
 </script>
 
-<div class="stat-card" class:clickable on:click>
+<div class="stat-card" class:clickable class:active on:click>
 	<span class="stat-value" style={highlightColor ? `color: ${highlightColor}` : ''}>{value}</span>
 	<div class="label-container">
 		<span class="stat-label">{label}</span>
@@ -35,6 +36,10 @@
 		transform: translateY(-3px);
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 		cursor: pointer;
+	}
+	.active {
+		border-color: #007bff;
+		box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 	}
 	.stat-value {
 		font-size: 2.5rem;
