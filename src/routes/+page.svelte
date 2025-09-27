@@ -22,7 +22,31 @@
 	let maxValueFilter = '';
 
 	// A reactive list of contracts filtered by the search term
-	$: filteredContracts = (data.contracts || []).filter((c: Contract) => {
+	$: contractsWithStatus = (data.contracts || []).map((c: Contract) => {
+		// Calculate the contract's current status for display and filtering
+		let currentStatus = 'Active';
+		if (c.end_date) {
+			const endDate = new Date(c.end_date + 'T00:00:00');
+			if (isPast(endDate)) {
+				currentStatus = 'Expired';
+			} else {
+				const daysUntilExpiry = differenceInDays(endDate, new Date());
+				if (daysUntilExpiry <= (c.notice_period_days ?? 30)) {
+					// It's within the notice period, check if it's a renewing contract
+					if (c.renewal_type === 'yearly') {
+						currentStatus = 'Renewing Soon';
+					} else {
+						currentStatus = 'Expiring Soon';
+					}
+				} else if (c.renewal_type) {
+					currentStatus = 'Auto-Renew';
+				}
+			}
+		}
+		return { ...c, status: currentStatus };
+	});
+
+	$: filteredContracts = contractsWithStatus.filter((c) => {
 		// 1. Search Term Filter
 		const lowerSearchTerm = searchTerm.toLowerCase().trim();
 		if (lowerSearchTerm) {
@@ -32,26 +56,7 @@
 		}
 
 		// 2. Status Filter
-		if (statusFilter !== 'all') {
-			// Calculate the contract's current status
-			let currentStatus = 'Active'; // Default status
-
-			if (c.renewal_type) {
-				currentStatus = 'Auto-Renew';
-			} else if (c.end_date) {
-				const endDate = new Date(c.end_date + 'T00:00:00');
-				if (isPast(endDate)) {
-					currentStatus = 'Expired';
-				} else {
-					const daysUntilExpiry = differenceInDays(endDate, new Date());
-					if (daysUntilExpiry <= (c.notice_period_days ?? 30)) {
-						currentStatus = 'Expiring Soon';
-					}
-				}
-			}
-
-			if (currentStatus !== statusFilter) return false;
-		}
+		if (statusFilter !== 'all' && c.status !== statusFilter) return false;
 
 		// 3. Type Filter
 		if (typeFilter !== 'all') {
@@ -176,6 +181,7 @@
 						<option value="Active">Active</option>
 						<option value="Expiring Soon">Expiring Soon</option>
 						<option value="Expired">Expired</option>
+						<option value="Renewing Soon">Renewing Soon</option>
 						<option value="Auto-Renew">Auto-Renew</option>
 					</select>
 				</div>

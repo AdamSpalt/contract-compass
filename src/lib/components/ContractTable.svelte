@@ -16,6 +16,7 @@
 		payment_terms: 'one_time' | 'monthly' | 'yearly' | null;
 		contract_type?: string;
 		notice_period_days: number | null;
+		status?: string; // The status is now passed in from the parent
 	};
 </script>
 
@@ -25,9 +26,6 @@
 
 	import { format, differenceInDays, isPast } from 'date-fns';
 	import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-
-	// This is a "prop" - it's the data that gets passed into this component from its parent.
-	// In this case, it's an array of contract objects.
 	export let contracts: Contract[];
 
 	type SortableColumn =
@@ -39,6 +37,15 @@
 		| 'contract_value'
 		| 'renewal_type'
 		| 'status';
+
+	// A map to get the right CSS class for each status text
+	const statusClassMap: Record<string, string> = {
+		Active: 'status-active',
+		'Expiring Soon': 'status-expiring',
+		Expired: 'status-expired',
+		'Auto-Renew': 'status-renews',
+		'Renewing Soon': 'status-renewing-soon'
+	};
 
 	// These variables keep track of the current sorting state.
 	let sortColumn: SortableColumn | null = 'start_date'; // Default sort by Start Date
@@ -70,7 +77,7 @@
 			const getSortableValue = (contract: Contract, key: SortableColumn) => {
 				switch (key) {
 					case 'status':
-						return getContractStatus(contract).text;
+						return contract.status ?? 'Active';
 					case 'end_date': // Represents the "End Date" column
 						if (contract.renewal_type === 'yearly') return new Date('9999-12-31');
 						if (contract.renewal_type === 'monthly') return new Date('9999-12-30');
@@ -100,27 +107,6 @@
 		});
 	})();
 
-	// This function calculates the status of a contract (e.g., Active, Expired)
-	// based on its dates and returns the text and a CSS class for styling.
-	function getContractStatus(contract: Contract) {
-		let status: { text: string; className: string } = { text: 'Active', className: 'status-active' };
-
-		if (contract.renewal_type) {
-			status = { text: 'Auto-Renew', className: 'status-renews' };
-		} else if (contract.end_date) {
-			// Add T00:00:00 to ensure date is parsed in local timezone, not UTC
-			const endDate = new Date(contract.end_date + 'T00:00:00');
-			if (isPast(endDate)) {
-				status = { text: 'Expired', className: 'status-expired' };
-			} else {
-				const daysUntilExpiry = differenceInDays(endDate, new Date());
-				if (daysUntilExpiry <= (contract.notice_period_days ?? 30)) {
-					status = { text: 'Expiring Soon', className: 'status-expiring' };
-				}
-			}
-		}
-		return status;
-	}
 </script>
 
 <!-- SECTION 3: HTML STRUCTURE & DISPLAY -->
@@ -165,7 +151,6 @@
 		<!-- Table Body -->
 		<!-- This `{#each}` block loops through the `sortedContracts` array and creates a table row `<tr>` for each contract. -->
 		{#each sortedContracts as contract (contract.id)}
-			{@const status = getContractStatus(contract)}
 			<tr>
 				<td>{contract.contract_name ?? 'N/A'}</td>
 				<td>{contract.vendor_name ?? 'N/A'}</td>
@@ -208,8 +193,8 @@
 					{/if}
 				</td>
 				<td>
-					<!-- The status badge gets its text and color from the `getContractStatus` function. -->
-					<span class="status-badge {status.className}">{status.text}</span>
+					<!-- The status badge now uses the pre-calculated status from the parent -->
+					<span class="status-badge {statusClassMap[contract.status ?? 'Active'] ?? 'status-active'}">{contract.status ?? 'Active'}</span>
 				</td>
 				<td>
 					<div class="actions-wrapper">
@@ -346,5 +331,8 @@
 	}
 	.status-renews {
 		background-color: #17a2b8; /* Teal */
+	}
+	.status-renewing-soon {
+		background-color: #6f42c1; /* Purple */
 	}
 </style>

@@ -18,7 +18,11 @@
 		if (isPast(endDate)) {
 			status = { text: 'Expired', className: 'status-expired' };
 		} else if (daysUntilExpiry <= (contract.notice_period_days ?? 30)) {
-			status = { text: 'Expiring Soon', className: 'status-expiring' };
+			if (contract.renewal_type === 'yearly') {
+				status = { text: 'Renewing Soon', className: 'status-renewing-soon' };
+			} else {
+				status = { text: 'Expiring Soon', className: 'status-expiring' };
+			}
 		} else if (contract.renewal_type) {
 			status = { text: 'Auto-Renews', className: 'status-renews' };
 		} else {
@@ -212,5 +216,8 @@
 	}
 	.status-renews {
 		background-color: #17a2b8; /* Teal */
+	}
+	.status-renewing-soon {
+		background-color: #6f42c1; /* Purple */
 	}
 </style>
