@@ -1,6 +1,10 @@
-<!-- serves as the main dashboard for your "Contract Compass" application. 
- Its primary purpose is to display contracts to the user and provide a powerful 
- set of tools for searching, filtering, and organizing them.-->
+<!--
+  This file serves as the main dashboard for the "Contract Compass" application.
+  Its primary purpose is to display a comprehensive list of contracts to the user
+  and provide a powerful set of tools for searching, filtering, and organizing them.
+  It also displays high-level status indicators like "Active Contracts" and
+  "Action Required".
+-->
 
 <script lang="ts">
 	// This 'data' prop is automatically passed from your +page.ts load function
@@ -55,24 +59,6 @@
 		(c) => c.status === 'Expiring Soon' || c.status === 'Renewing Soon'
 	).length;
 	$: expiredContractsCount = contractsWithStatus.filter((c) => c.status === 'Expired').length;
-	$: monthlyRecurringCost = contractsWithStatus
-		.filter((c) => c.status !== 'Expired' && c.payment_terms === 'monthly' && c.contract_value)
-		.reduce((total, contract) => {
-			return total + contract.contract_value;
-		}, 0);
-	$: next30DayRenewalValue = contractsWithStatus
-		.filter((c) => {
-			if (c.status === 'Expired' || !c.end_date || !c.contract_value) {
-				return false;
-			}
-			const daysUntilExpiry = differenceInDays(new Date(c.end_date + 'T00:00:00'), new Date());
-			// Include contracts ending today up to 30 days from now.
-			return daysUntilExpiry >= 0 && daysUntilExpiry <= 30;
-		})
-		.reduce((total, contract) => total + contract.contract_value, 0);
-	$: totalActiveValue = contractsWithStatus
-		.filter((c) => c.status !== 'Expired' && c.contract_value)
-		.reduce((total, contract) => total + contract.contract_value, 0);
 
 	$: areFiltersActive =
 		searchTerm !== '' ||
@@ -173,7 +159,7 @@
 </script>
 
 <main>
-	<h1>Contract Compass</h1>
+	<h1>Dashboard</h1>
 
 	<p>A central place to manage all your important contracts.</p>
 
@@ -203,23 +189,6 @@
 			active={statusFilter === 'Expired'}
 			on:click={() => (statusFilter = 'Expired')}
 			tooltipText="The total number of contracts that have passed their end date."
-		/>
-	</div>
-	<div class="stats-container">
-		<StatCard
-			value={new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(monthlyRecurringCost)}
-			label="Monthly Recurring Cost"
-			tooltipText="The sum of all active contracts with monthly payment terms. This shows your baseline monthly operational spend."
-		/>
-		<StatCard
-			value={new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(next30DayRenewalValue)}
-			label="Next 30-Day Renewal Value"
-			tooltipText="The total value of all contracts ending within the next 30 days. This helps forecast upcoming payments and renewal decisions."
-		/>
-		<StatCard
-			value={new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(totalActiveValue)}
-			label="Total Value of Active Contracts"
-			tooltipText="The simple sum of the contract value for all active contracts, regardless of their payment terms."
 		/>
 	</div>
 

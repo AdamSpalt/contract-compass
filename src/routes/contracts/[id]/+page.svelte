@@ -2,7 +2,6 @@
 	import { format, differenceInDays, isPast, subDays } from 'date-fns';
 	export let data;
 	const { contract, supabaseUrl } = data;
-
 	let status: { text: string; className: string } = { text: 'Active', className: 'status-active' };
 	let terminationDeadline: Date | null = null; // Must Cancel By date
 
@@ -32,7 +31,10 @@
 </script>
 
 <main>
-	<a href="/" class="back-link">&larr; Back to Dashboard</a>
+	<div class="back-links-container">
+		<a href="/" class="back-link">&larr; Back to Dashboard</a>
+		<a href="/analysis" class="back-link">&larr; Back to Insights</a>
+	</div>
 	<h1>Contract Details</h1>
 
 	<div class="card">
@@ -118,9 +120,14 @@
 		padding: 1.5rem;
 		font-family: sans-serif;
 	}
-	.back-link {
-		display: inline-block;
+	.back-links-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
 		margin-bottom: 1.5rem;
+	}
+	.back-link {
+		align-self: flex-start;
 		color: #555;
 		text-decoration: none;
 	}
