@@ -17,6 +17,7 @@ import {
 	isWithinInterval,
 	startOfYear,
 	endOfYear,
+	endOfMonth,
 	subYears,
 	differenceInCalendarMonths,
 	addMonths,
@@ -175,30 +176,35 @@ export const load: PageServerLoad = async ({ url }) => {
 		const contractStart = parseISO(contract.start_date);
 		const contractEnd = contract.end_date ? parseISO(contract.end_date) : new Date('2999-12-31');
 
-		if (contract.payment_terms === 'one_time') {
+		if (contract.payment_terms === 'one_time' || contract.payment_terms === 'yearly') {
 			const monthKey = format(contractStart, 'yyyy-MM');
 			if (trendBuckets.has(monthKey)) {
 				trendBuckets.set(monthKey, trendBuckets.get(monthKey)! + contract.contract_value);
 			}
-		} else {
-			const monthlyCost = contract.payment_terms === 'monthly' ? contract.contract_value : (contract.contract_value || 0) / 12;
-			for (const [monthKey, total] of trendBuckets.entries()) {
-				const monthDate = parseISO(monthKey + '-01');
-				// Add cost if the contract is active during this month
-				if (isWithinInterval(monthDate, { start: startOfMonth(contractStart), end: contractEnd })) {
-					trendBuckets.set(monthKey, total + monthlyCost);
+		} else if (contract.payment_terms === 'monthly') {
+			// For monthly contracts, find the months it was active within the trend's date range.
+			const trendInterval = { start: startOfMonth(interval.start), end: endOfMonth(interval.end) };
+			const effectiveStart = max([startOfMonth(contractStart), trendInterval.start]);
+			const effectiveEnd = min([contractEnd, trendInterval.end]);
+
+			let currentMonth = effectiveStart;
+			while (currentMonth <= effectiveEnd) {
+				const monthKey = format(currentMonth, 'yyyy-MM');
+				if (trendBuckets.has(monthKey)) {
+					trendBuckets.set(monthKey, trendBuckets.get(monthKey)! + contract.contract_value);
 				}
+				currentMonth = addMonths(currentMonth, 1);
 			}
 		}
 	}
-
-	// Format the date range for display in chart titles
-	const displayInterval = `${format(interval.start, 'MMM yyyy')} - ${format(interval.end, 'MMM yyyy')}`;
 
 	const spendTrend = {
 		labels: trendLabels,
 		data: Array.from(trendBuckets.values())
 	};
+
+	// Format the date range for display in chart titles
+	const displayInterval = `${format(interval.start, 'MMM yyyy')} - ${format(interval.end, 'MMM yyyy')}`;
 
 	return {
 		monthlyRecurringCost,
