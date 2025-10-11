@@ -1,9 +1,9 @@
 /**
  * This server-side script is responsible for loading and preparing the data
  * for the Financial Analysis dashboard. It fetches all contracts from the
- * database and calculates several Key Performance Indicators (KPIs) based
- * on the contract data. These KPIs are then passed to the corresponding
- * `+page.svelte` component for display.
+ * database, processes them based on the selected date range from the URL,
+ * and calculates several Key Performance Indicators (KPIs). These are then
+ * passed to the `+page.svelte` component for display.
  */
 
 import type { PageServerLoad } from './$types';
@@ -19,10 +19,18 @@ import {
 	endOfYear,
 	subYears,
 	differenceInCalendarMonths,
-	addMonths
+	addMonths,
+	parseISO,
+	max,
+	min,
+	differenceInDays
 } from 'date-fns';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ url }) => {
+	// --- Date Filter Setup ---
+	// Read start and end dates from URL search parameters.
+	const startDateParam = url.searchParams.get('start');
+	const endDateParam = url.searchParams.get('end');
 	const { data: contracts, error } = await supabase.from('contracts').select('*');
 
 	if (error) {
@@ -32,31 +40,30 @@ export const load: PageServerLoad = async () => {
 		return {
 			monthlyRecurringCost: 0,
 			totalAnnualizedSpend: 0,
-			oneTimeContractsCountYTD: 0, // This will be removed, but need to keep shape for now
-			oneTimeContractsValueYTD: 0,
+			oneTimeSpendInRange: 0, // This will be removed, but need to keep shape for now
 			spendByType: [],
 			spendTrend: { labels: [], data: [] },
-			allTypes: [],
-			top5Contracts: []
+			top5Contracts: [],
+			displayInterval: ''
 		};
 	}
 
 	// --- KPI Calculations ---
-	// Note: Annualized and Monthly Recurring costs are snapshots of *current* commitments
-	// and are not affected by date range filters. One-Time spend is affected.
+	// Note: Annualized and Monthly Recurring costs are snapshots of *current* commitments.
+	// These are intentionally NOT affected by the date range filter.
 
 	// Filter for contracts that are currently active.
-	const activeContracts = (contracts ?? []).filter((c) => {
+	const currentlyActiveContracts = (contracts ?? []).filter((c) => {
 		if (!c.end_date) return true; // No end date means it's active
 		return !isPast(new Date(c.end_date + 'T00:00:00'));
 	});
 
-	const monthlyRecurringCost = activeContracts
+	const monthlyRecurringCost = currentlyActiveContracts
 		.filter((c) => c.payment_terms === 'monthly' && c.contract_value)
 		.reduce((sum, c) => sum + c.contract_value, 0);
 
-	const totalAnnualizedSpend = activeContracts
-		.filter((c) => c.payment_terms === 'monthly' || c.payment_terms === 'yearly')
+	const totalAnnualizedSpend = currentlyActiveContracts
+		.filter((c) => c.payment_terms === 'monthly' || c.payment_terms === 'yearly' || c.payment_terms === 'one_time')
 		.reduce((sum, c) => {
 			if (c.payment_terms === 'monthly' && c.contract_value) {
 				return sum + c.contract_value * 12;
@@ -68,62 +75,73 @@ export const load: PageServerLoad = async () => {
 		}, 0);
 
 	// --- Date Range Interval ---
+	// Establish the date interval for filtering. Default to the last 12 months if not provided.
 	const now = new Date();
-	const interval = { start: subMonths(now, 12), end: now };
-	const trendInterval = { start: subMonths(now, 12), end: now }; // Keep trend line as a rolling 12 months for now
+	const interval = {
+		start: startDateParam ? parseISO(startDateParam) : startOfYear(now),
+		end: endDateParam ? parseISO(endDateParam) : now // Default end is today
+	};
 
-	const currentYearOneTimeContracts = (contracts ?? []).filter(
-		(c) =>
-			c.payment_terms === 'one_time' &&
-			c.start_date &&
-			getYear(new Date(c.start_date + 'T00:00:00')) === getYear(now)
-	);
+	// --- Filter Contracts by Date Range ---
+	// A contract is considered relevant for the period if it was active at any point during the interval.
+	const contractsInDateRange = (contracts ?? []).filter((contract) => {
+		if (!contract.start_date) return false;
+		const contractStart = parseISO(contract.start_date);
+		const contractEnd = contract.end_date ? parseISO(contract.end_date) : new Date('2999-12-31');
 
-	const oneTimeContractsValueYTD = currentYearOneTimeContracts.reduce(
-		(sum, c) => sum + (c.contract_value || 0),
-		0
-	);
+		// Check for overlap: (StartA <= EndB) and (EndA >= StartB)
+		return contractStart <= interval.end && contractEnd >= interval.start;
+	});
+
+	// --- KPI: One-Time Spend In Range ---
+	const oneTimeSpendInRange = contractsInDateRange
+		.filter(
+			(c) =>
+				c.payment_terms === 'one_time' &&
+				c.start_date &&
+				isWithinInterval(parseISO(c.start_date), interval)
+		)
+		.reduce((sum, c) => sum + (c.contract_value || 0), 0);
 
 	// --- Top 5 Contracts Calculation ---
-	const top5Contracts = [...activeContracts]
+	// This is now based on contracts active within the selected date range.
+	const top5Contracts = [...contractsInDateRange]
 		.sort((a, b) => (b.contract_value || 0) - (a.contract_value || 0))
 		.slice(0, 5);
 
 	// --- Chart Data Calculations ---
 	const vendorSpend = new Map<string, number>();
 	const typeSpend = new Map<string, number>();
-
-	for (const contract of contracts ?? []) {
+	for (const contract of contractsInDateRange) {
 		if (!contract.contract_value) continue;
 
 		const vendorName = contract.vendor_name || 'Unknown Vendor';
 		const typeName = contract.contract_type || 'Uncategorized';
 		let spend = 0;
 
-		if (contract.payment_terms === 'one_time') {
-			// Check if the one-time contract is in the interval for the charts
-			if (contract.start_date && isWithinInterval(new Date(contract.start_date + 'T00:00:00'), interval)) {
+		if (contract.payment_terms === 'one_time' || contract.payment_terms === 'yearly') {
+			// For one-time and yearly contracts, the full value is recognized on the start date.
+			// We only include it in spend charts if the start date is within the filtered interval.
+			if (contract.start_date && isWithinInterval(parseISO(contract.start_date), interval)) {
 				spend = contract.contract_value;
 			}
-		} else {
-			// For recurring contracts, calculate the spend that occurred *within* the selected date interval.
-			const contractStartDate = new Date(contract.start_date + 'T00:00:00');
-			const contractEndDate = contract.end_date ? new Date(contract.end_date + 'T00:00:00') : new Date('2999-12-31');
+		} else if (contract.payment_terms === 'monthly') {
+			// For monthly contracts, calculate the prorated spend that occurred *within* the selected date interval.
+			const contractStartDate = parseISO(contract.start_date);
+			const contractEndDate = contract.end_date ? parseISO(contract.end_date) : new Date('2999-12-31');
 
 			// Determine the actual start and end dates for the overlap period.
-			const overlapStartDate = contractStartDate > interval.start ? contractStartDate : interval.start;
-			const overlapEndDate = contractEndDate < interval.end ? contractEndDate : interval.end;
+			const overlapStartDate = max([contractStartDate, interval.start]);
+			const overlapEndDate = min([contractEndDate, interval.end]);
 
 			// If there is a valid overlap...
 			if (overlapStartDate < overlapEndDate) {
-				const monthlyCost =
-					contract.payment_terms === 'monthly' ? contract.contract_value : contract.contract_value / 12;
-				// Calculate the number of months in the overlap period.
-				// Using differenceInCalendarMonths is more robust for this kind of calculation.
-				let monthsInInterval = differenceInCalendarMonths(overlapEndDate, overlapStartDate);
-				// Add 1 to make it inclusive, as differenceInCalendarMonths is 0 for the same month.
-				if (monthsInInterval >= 0) monthsInInterval += 1;
-				spend = monthlyCost * Math.max(0, monthsInInterval);
+				const monthlyCost = contract.contract_value;
+				// Calculate the number of full calendar months in the overlap.
+				// We add 1 because differenceInCalendarMonths is zero-based (e.g., Jan to Feb is 1).
+				const monthsInOverlap = differenceInCalendarMonths(overlapEndDate, overlapStartDate) + 1;
+				const calculatedSpend = monthlyCost * monthsInOverlap;
+				spend = Math.round(calculatedSpend * 100) / 100; // Round to two decimal places
 			}
 		}
 
@@ -138,57 +156,58 @@ export const load: PageServerLoad = async () => {
 	);
 	const spendByType = Array.from(typeSpend, ([name, total]) => ({ name, total }));
 
-	// 2. Spend Trend (Last 12 Months)
+	// 2. Spend Trend (dynamically calculated for the selected interval)
 	const trendBuckets = new Map<string, number>();
 	const trendLabels: string[] = [];
+	const monthsInTrend = differenceInCalendarMonths(interval.end, interval.start);
 
-	// Initialize 12 monthly buckets
-	for (let i = 11; i >= 0; i--) {
-		const date = subMonths(trendInterval.end, i);
+	// Initialize monthly buckets for the selected date range
+	for (let i = 0; i <= monthsInTrend; i++) {
+		const date = addMonths(startOfMonth(interval.start), i);
 		const label = format(date, 'MMM yy');
 		trendLabels.push(label);
 		trendBuckets.set(format(date, 'yyyy-MM'), 0);
 	}
 
-	for (const contract of contracts ?? []) {
+	for (const contract of contractsInDateRange) {
 		if (!contract.contract_value || !contract.start_date) continue;
 
-		const startDate = new Date(contract.start_date);
-		const endDate = contract.end_date ? new Date(contract.end_date) : new Date('2999-12-31');
+		const contractStart = parseISO(contract.start_date);
+		const contractEnd = contract.end_date ? parseISO(contract.end_date) : new Date('2999-12-31');
 
 		if (contract.payment_terms === 'one_time') {
-			const monthKey = format(startDate, 'yyyy-MM');
+			const monthKey = format(contractStart, 'yyyy-MM');
 			if (trendBuckets.has(monthKey)) {
 				trendBuckets.set(monthKey, trendBuckets.get(monthKey)! + contract.contract_value);
 			}
 		} else {
-			const monthlyCost = contract.payment_terms === 'monthly' ? contract.contract_value : contract.contract_value / 12;
+			const monthlyCost = contract.payment_terms === 'monthly' ? contract.contract_value : (contract.contract_value || 0) / 12;
 			for (const [monthKey, total] of trendBuckets.entries()) {
-				const monthDate = new Date(monthKey + '-01T00:00:00');
+				const monthDate = parseISO(monthKey + '-01');
 				// Add cost if the contract is active during this month
-				if (isWithinInterval(monthDate, { start: startOfMonth(startDate), end: endDate })) {
+				if (isWithinInterval(monthDate, { start: startOfMonth(contractStart), end: contractEnd })) {
 					trendBuckets.set(monthKey, total + monthlyCost);
 				}
 			}
 		}
 	}
 
+	// Format the date range for display in chart titles
+	const displayInterval = `${format(interval.start, 'MMM yyyy')} - ${format(interval.end, 'MMM yyyy')}`;
+
 	const spendTrend = {
 		labels: trendLabels,
 		data: Array.from(trendBuckets.values())
 	};
 
-	// --- Data for Filter Dropdowns ---
-	const allTypes = [...new Set((contracts ?? []).map((c) => c.contract_type).filter(Boolean))].sort() as string[];
-
 	return {
 		monthlyRecurringCost,
 		totalAnnualizedSpend,
-		oneTimeContractsValueYTD,
+		oneTimeSpendInRange,
 		spendByVendor,
 		spendByType,
 		spendTrend,
-		allTypes,
-		top5Contracts
+		top5Contracts,
+		displayInterval
 	};
 };

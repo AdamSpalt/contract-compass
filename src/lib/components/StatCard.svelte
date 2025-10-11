@@ -5,17 +5,23 @@
 	export let clickable = false;
 	export let tooltipText: string | null = null;
 	export let active = false;
+	export let subLabel: string = '';
 </script>
 
 <div class="stat-card" class:clickable class:active on:click>
 	<span class="stat-value" style={highlightColor ? `color: ${highlightColor}` : ''}>{value}</span>
 	<div class="label-container">
-		<span class="stat-label">{label}</span>
-		{#if tooltipText}
-			<div class="tooltip-container">
-				<span class="info-icon">(i)</span>
-				<span class="tooltip">{tooltipText}</span>
-			</div>
+		<div class="main-label-line">
+			<span class="stat-label">{label}</span>
+			{#if tooltipText}
+				<div class="tooltip-container">
+					<span class="info-icon">?</span>
+					<span class="tooltip">{tooltipText}</span>
+				</div>
+			{/if}
+		</div>
+		{#if subLabel}
+			<span class="sub-label">{subLabel}</span>
 		{/if}
 	</div>
 </div>
@@ -52,8 +58,20 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		gap: 0.3rem;
 		margin-top: 0.5rem;
+		flex-direction: column;
+	}
+	.main-label-line {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.sub-label {
+		font-size: 0.75rem;
+		color: #6c757d;
+		font-style: italic;
+		margin-top: 0.1rem;
 	}
 	.stat-label {
 		font-size: 0.9rem;
@@ -62,8 +80,11 @@
 	.tooltip-container {
 		position: relative;
 		display: inline-block;
+		cursor: pointer;
 	}
 	.info-icon {
+		font-family: sans-serif;
+		font-weight: bold;
 		font-size: 0.8rem;
 		color: #aaa;
 		cursor: help;

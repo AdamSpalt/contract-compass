@@ -5,10 +5,41 @@
   component is to display this financial data in a clear and understandable
   way, using components like StatCard and charts.
 -->
-<script lang="ts">
+<script lang="ts" generics="Data extends Record<string, any>">
 	import StatCard from '$lib/components/StatCard.svelte';
 	import Chart from '$lib/components/Chart.svelte';
 	import type { PageData } from './$types';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { subMonths, format as formatDate, startOfYear } from 'date-fns';
+
+	// --- Date Filter State & Logic ---
+	// This section adds the UI controls and state management for the date range filter.
+
+	/**
+	 * Helper function to format a date as 'yyyy-MM-dd' for input fields.
+	 * @param {Date} date - The date to format.
+	 * @returns {string} The formatted date string.
+	 */
+	function toInputFormat(date: Date): string {
+		return formatDate(date, 'yyyy-MM-dd');
+	}
+
+	// Initialize start and end dates from URL search params, or set sensible defaults.
+	const now = new Date();
+	let startDate = $page.url.searchParams.get('start') || toInputFormat(startOfYear(now));
+	let endDate = $page.url.searchParams.get('end') || toInputFormat(now);
+
+	/**
+	 * Applies the selected date filter by navigating to a new URL with the
+	 * start and end dates as search parameters. This triggers a server-side data reload.
+	 */
+	function applyDateFilter() {
+		const newUrl = new URL($page.url);
+		newUrl.searchParams.set('start', startDate);
+		newUrl.searchParams.set('end', endDate);
+		goto(newUrl, { keepFocus: true, noScroll: true });
+	}
 
 	const { data }: { data: PageData } = $props();
 
@@ -28,7 +59,7 @@
 		labels: data?.spendByVendor.slice(0, 10).map((v) => v.name) ?? [], // Top 10 vendors
 		datasets: [
 			{
-				label: 'Total Spend (Last 12 Months)',
+				label: `Total Spend (${data?.displayInterval})`,
 				data: data?.spendByVendor.slice(0, 10).map((v) => v.total) ?? [],
 				backgroundColor: [
 					'rgba(30, 144, 255, 0.6)', // Dodger Blue
@@ -55,11 +86,20 @@
 		plugins: {
 			legend: {
 				display: false
+			},
+			tooltip: {
+				callbacks: {
+					label: (context) => formatCurrency(context.parsed.x)
+				}
 			}
 		},
 		scales: {
 			x: {
-				beginAtZero: true
+				beginAtZero: true,
+				ticks: {
+					// Format the X-axis labels as currency
+					callback: (value) => new Intl.NumberFormat('pl-PL').format(typeof value === 'number' ? value : 0)
+				}
 			}
 		}
 	};
@@ -84,7 +124,14 @@
 
 	const spendByTypeChartOptions = {
 		responsive: true,
-		maintainAspectRatio: false
+		maintainAspectRatio: false,
+		plugins: {
+			tooltip: {
+				callbacks: {
+					label: (context) => `${context.label}: ${formatCurrency(context.parsed)}`
+				}
+			}
+		}
 	};
 
 	// Data for the "Spend Trend" line chart
@@ -112,13 +159,20 @@
 		plugins: {
 			legend: {
 				display: false
+			},
+			tooltip: {
+				callbacks: {
+					label: (context) => formatCurrency(context.parsed.y)
+				}
 			}
 		},
 		scales: {
 			y: {
 				beginAtZero: true,
 				ticks: {
-					stepSize: 100
+					stepSize: 100,
+					// Format the Y-axis labels as currency
+					callback: (value) => formatCurrency(typeof value === 'number' ? value : 0)
 				}
 			}
 		}
@@ -129,28 +183,45 @@
 	<h1>Insights</h1>
 	<p>Unlock financial insights from your contracts. Visualize spending trends, vendor costs, and your most valuable agreements.</p>
 
+	<!-- Date Filter Controls -->
+	<div class="filter-container">
+		<div class="filter-group">
+			<label for="start-date">Start Date</label>
+			<input type="date" id="start-date" bind:value={startDate} />
+		</div>
+		<div class="filter-group">
+			<label for="end-date">End Date</label>
+			<input type="date" id="end-date" bind:value={endDate} />
+		</div>
+		<button on:click={applyDateFilter} class="apply-button">Apply</button>
+	</div>
+	<!-- End Date Filter Controls -->
+
 	<div class="stats-container">
 		<StatCard
 			label="Monthly Recurring Cost"
+			subLabel="(Live Snapshot)"
 			value={formatCurrency(data?.monthlyRecurringCost ?? 0)}
-			tooltipText="The sum of all active contracts with monthly payment terms. This shows your baseline monthly operational spend."
+			tooltipText="A live snapshot of your current monthly recurring costs. This value is NOT affected by the date filter."
 		/>
 		<StatCard
 			label="Total Annualized Spend"
+			subLabel="(Live Snapshot)"
 			value={formatCurrency(data?.totalAnnualizedSpend ?? 0)}
-			tooltipText="The projected recurring spend over the next 12 months, based on all active monthly and yearly contracts."
+			tooltipText="A live snapshot of your projected spend over the next 12 months. This value is NOT affected by the date filter."
 		/>
 		<StatCard
-			label="One-Time Contracts Value (YTD)"
-			value={formatCurrency(data?.oneTimeContractsValueYTD ?? 0)}
-			tooltipText="The total value of contracts with a 'one-time' payment term that started in the current calendar year."
+			label="One-Time Spend (in range)"
+			subLabel="(In Selected Range)"
+			value={formatCurrency(data?.oneTimeSpendInRange ?? 0)}
+			tooltipText="The total value of contracts with a 'one-time' payment term that started in the selected date range."
 		/>
 	</div>
 
 	<!-- Chart Grid -->
 	<div class="charts-container">
 		<div class="chart-wrapper large">
-			<h2>Spend by Vendor (Top 10, Last 12 Months)</h2>
+			<h2>Spend by Vendor (Top 10)</h2>
 			<div class="chart-inner-container">
 				<Chart type="bar" data={spendByVendorChartData} options={spendByVendorChartOptions} />
 			</div>
@@ -164,7 +235,7 @@
 		</div>
 
 		<div class="chart-wrapper large">
-			<h2>Total Spend Trend (Last 12 Months)</h2>
+			<h2>Total Spend Trend</h2>
 			<div class="chart-inner-container">
 				<Chart type="line" data={spendTrendChartData} options={spendTrendChartOptions} />
 			</div>
@@ -208,6 +279,50 @@
 		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 		gap: 1.5rem;
 		margin: 2rem 0;
+	}
+
+	.filter-container {
+		display: flex;
+		gap: 1rem;
+		align-items: flex-end;
+		margin: 2rem 0;
+		padding: 1rem 1.5rem;
+		background-color: #f8f9fa;
+		border: 1px solid #dee2e6;
+		border-radius: 6px;
+	}
+
+	.filter-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.filter-group label {
+		font-size: 0.875rem;
+		color: #555;
+		margin-bottom: 0.25rem;
+		font-weight: 500;
+	}
+
+	.filter-group input[type='date'] {
+		padding: 0.5rem;
+		font-size: 0.9rem;
+		border-radius: 5px;
+		border: 1px solid #ccc;
+	}
+
+	.apply-button {
+		padding: 0.6rem 1.2rem;
+		font-weight: 500;
+		color: white;
+		background-color: #007bff;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+	.apply-button:hover {
+		background-color: #0056b3;
 	}
 
 	p {
