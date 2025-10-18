@@ -516,9 +516,8 @@
 <style>
 	main {
 		max-width: 1200px;
-		margin: 2rem auto;
+		margin: 1rem auto;
 		padding: 1.5rem;
-		font-family: sans-serif;
 	}
 
 	.stats-container {
@@ -534,8 +533,8 @@
 		align-items: flex-end;
 		margin: 2rem 0;
 		padding: 1rem 1.5rem;
-		background-color: #f8f9fa;
-		border: 1px solid #dee2e6;
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
 		border-radius: 6px;
 	}
 
@@ -546,7 +545,7 @@
 
 	.filter-group label {
 		font-size: 0.875rem;
-		color: #555;
+		color: var(--color-text-secondary);
 		margin-bottom: 0.25rem;
 		font-weight: 500;
 	}
@@ -555,25 +554,25 @@
 		padding: 0.5rem;
 		font-size: 0.9rem;
 		border-radius: 5px;
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 	}
 
 	.apply-button {
 		padding: 0.6rem 1.2rem;
 		font-weight: 500;
 		color: white;
-		background-color: #007bff;
+		background-color: var(--color-primary);
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
 		transition: background-color 0.2s;
 	}
 	.apply-button:hover {
-		background-color: #0056b3;
+		background-color: var(--color-primary-hover);
 	}
 
 	p {
-		color: #555;
+		color: var(--color-text-secondary);
 		margin-top: 1rem;
 	}
 
@@ -595,14 +594,14 @@
 		border-radius: 8px;
 		gap: 1rem;
 		font-weight: 500;
-		color: #333;
+		color: var(--color-text-primary);
 	}
 
 	.spinner {
 		width: 40px;
 		height: 40px;
 		border: 4px solid #f3f3f3;
-		border-top: 4px solid #007bff;
+		border-top: 4px solid var(--color-primary);
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}
@@ -617,11 +616,11 @@
 	}
 
 	.chart-wrapper {
-		background-color: #fff;
-		border: 1px solid #e0e0e0;
-		border-radius: 8px;
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--border-radius);
 		padding: 1.5rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+		box-shadow: var(--box-shadow);
 	}
 
 	.inline-filter-controls {
@@ -655,7 +654,7 @@
 	.link-button {
 		background: none;
 		border: none;
-		color: #007bff;
+		color: var(--color-primary);
 		cursor: pointer;
 		padding: 0;
 		font-size: 0.875rem;
@@ -664,8 +663,8 @@
 
 	.dropdown-toggle {
 		width: auto; /* Let the button size to its content */
-		background-color: #fff;
-		border: 1px solid #ccc;
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
 		border-radius: 5px;
 		padding: 0.5rem 0.75rem;
 		text-align: left;
@@ -677,14 +676,14 @@
 	}
 
 	.dropdown-toggle:hover {
-		background-color: #f9f9f9;
+		background-color: var(--color-bg);
 	}
 
 	.dropdown-content {
 		position: absolute;
 		width: 100%;
-		background-color: #fff;
-		border: 1px solid #ccc;
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
 		border-top: none;
 		border-radius: 0 0 5px 5px;
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -699,10 +698,10 @@
 		gap: 0.5rem;
 		max-height: 120px; /* Give it a max height */
 		overflow-y: auto; /* Add a scrollbar if content overflows */
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 		padding: 0.75rem;
 		border-radius: 5px;
-		background-color: #fff;
+		background-color: var(--color-surface);
 	}
 
 	.vendor-checkboxes label {
@@ -716,8 +715,8 @@
 		padding: 0.5rem;
 		font-size: 0.9rem;
 		border-radius: 5px;
-		border: 1px solid #ccc;
-		background-color: white;
+		border: 1px solid var(--color-border);
+		background-color: var(--color-surface);
 	}
 
 	.chart-wrapper.full-width {
@@ -728,7 +727,7 @@
 		margin-top: 0;
 		font-size: 1.2rem;
 		font-weight: 600;
-		color: #333;
+		color: var(--color-text-primary);
 	}
 
 	.chart-inner-container {
@@ -754,7 +753,7 @@
 	}
 
 	.top-contracts-list li {
-		border-bottom: 1px solid #f0f0f0;
+		border-bottom: 1px solid var(--color-border);
 		transition: background-color 0.2s ease-in-out;
 	}
 
@@ -773,19 +772,19 @@
 
 	.contract-name {
 		font-weight: 600;
-		color: #333;
+		color: var(--color-text-primary);
 	}
 
 	.vendor-name {
 		font-size: 0.875rem;
-		color: #777;
+		color: var(--color-text-secondary);
 	}
 
 	.contract-value {
 		font-weight: 600;
 		font-size: 0.9rem;
-		background-color: rgba(54, 162, 235, 0.1);
-		color: #005a9e;
+		background-color: #e0f2fe; /* Light blue background */
+		color: #0c4a6e; /* Darker blue text */
 		padding: 0.25rem 0.6rem;
 		border-radius: 12px;
 	}
@@ -805,7 +804,7 @@
 		overflow-y: auto;
 		flex-grow: 1; /* Take remaining space */
 		padding-top: 1rem;
-		border-top: 1px solid #eee;
+		border-top: 1px solid var(--color-border);
 		margin-top: 1rem;
 	}
 
@@ -836,7 +835,7 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		color: #333;
+		color: var(--color-text-primary);
 	}
 
 	.legend-value {
@@ -844,9 +843,9 @@
 		justify-self: end;
 	}
 	.legend-percentage {
-		color: #666;
+		color: var(--color-text-secondary);
 		font-size: 0.8rem;
-		width: 45px; /* Align percentages */
+		width: 55px; /* Align percentages */
 		text-align: right;
 	}
 

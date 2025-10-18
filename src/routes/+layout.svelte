@@ -1,78 +1,63 @@
-<!--
-  This file serves as the root layout for the entire application.
-  It defines the main navigation header that is shared across all pages,
-  providing consistent links to the "Dashboard" and "Analysis" sections.
-  The `<slot />` component renders the content of the current page.
--->
 <script>
-	import { page } from '$app/stores';
 	import '../app.css';
+	import { page } from '$app/stores';
 </script>
 
 <header>
-	<div class="header-inner">
-		<div class="logo">
-			<a href="/">Contract Compass</a>
-		</div>
-		<nav>
+	<nav>
+		<a href="/" class="logo">Contract Compass</a>
+		<div class="nav-links">
 			<a href="/" class:active={$page.url.pathname === '/'}>Dashboard</a>
-			<a href="/analysis" class:active={$page.url.pathname.startsWith('/analysis')}>Insights</a>
-		</nav>
-	</div>
+			<a href="/analysis" class:active={$page.url.pathname === '/analysis'}>Insights</a>
+		</div>
+	</nav>
 </header>
 
-<slot />
+<div class="main-content">
+	<slot />
+</div>
 
 <style>
 	header {
-		display: flex;
-		background-color: #e9ecef;
+		background-color: var(--color-surface);
+		border-bottom: 1px solid var(--color-border);
 		padding: 0 2rem;
-		border-bottom: 1px solid #e0e0e0;
-		font-family: sans-serif;
+		box-shadow: var(--box-shadow);
 	}
-
-	.header-inner {
+	nav {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		width: 100%;
 		max-width: 1200px;
 		margin: 0 auto;
-		padding: 1rem 0;
+		height: 60px;
 	}
-
-	.logo a {
-		font-size: 1.5rem;
+	.logo {
 		font-weight: 700;
-		color: #333;
+		font-size: 1.25rem;
+		color: var(--color-text-primary);
 		text-decoration: none;
 	}
-
-	nav {
+	.nav-links {
 		display: flex;
 		gap: 1.5rem;
 	}
-
-	nav a {
-		color: #555;
+	.nav-links a {
 		text-decoration: none;
+		color: var(--color-text-secondary);
 		font-weight: 500;
-		padding: 0.5rem 1rem;
-		border-radius: 9999px; /* Creates the pill shape */
-		transition:
-			color 0.2s,
-			background-color 0.2s;
+		padding: 0.5rem 0;
+		border-bottom: 2px solid transparent;
+		transition: color 0.2s, border-color 0.2s;
 	}
-
-	nav a:hover {
-		color: #005a9e;
-		background-color: #f0f5fa; /* Light blue background on hover */
+	.nav-links a:hover {
+		color: var(--color-primary);
 	}
-
-	nav a.active {
-		color: #005a9e; /* Darker blue text for active link */
-		background-color: #e0eefc; /* A slightly darker blue for the pill */
-		font-weight: 600;
+	.nav-links a.active {
+		color: var(--color-primary);
+		border-bottom-color: var(--color-primary);
+	}
+	.main-content {
+		/* padding-top is handled by individual page margins */
 	}
 </style>

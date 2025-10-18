@@ -156,12 +156,12 @@
 		margin-top: 2rem;
 		margin-bottom: 1rem;
 		color: #333;
-		border-bottom: 1px solid #eee;
+		border-bottom: 1px solid var(--color-border);
 		padding-bottom: 0.5rem;
 	}
 	hr {
 		border: none;
-		border-top: 1px solid #eee;
+		border-top: 1px solid var(--color-border);
 		margin: 1.5rem 0;
 	}
 	.form-group {
@@ -176,11 +176,11 @@
 		width: 100%;
 		padding: 0.5rem;
 		font-size: 1rem;
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 	}
 	.readonly-input {
-		background-color: #f0f0f0;
+		background-color: var(--color-bg);
 		cursor: not-allowed;
 	}
 	.radio-group {
@@ -198,19 +198,23 @@
 	}
 	button {
 		padding: 0.75rem 1.5rem;
-		background-color: #007bff;
+		background-color: var(--color-primary);
 		color: white;
 		border: none;
 		border-radius: 4px;
 		cursor: pointer;
 		font-size: 1rem;
+		transition: background-color 0.2s;
+	}
+	button:hover {
+		background-color: var(--color-primary-hover);
 	}
 	.error {
-		color: red;
+		color: var(--color-danger);
 		margin-top: 1rem;
 	}
 	.error-details {
-		color: #555;
+		color: var(--color-text-secondary);
 		font-size: 0.9rem;
 	}
 </style>

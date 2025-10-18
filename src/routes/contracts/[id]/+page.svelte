@@ -131,15 +131,15 @@
 	}
 	.back-link {
 		align-self: flex-start;
-		color: #555;
+		color: var(--color-text-secondary);
 		text-decoration: none;
 	}
 	.card {
-		background: #fff;
-		border: 1px solid #e0e0e0;
-		border-radius: 8px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--border-radius);
 		padding: 2rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		box-shadow: var(--box-shadow);
 	}
 	.card-header {
 		display: flex;
@@ -166,7 +166,7 @@
 	}
 	hr {
 		border: none;
-		border-top: 1px solid #eee;
+		border-top: 1px solid var(--color-border);
 		margin: 1.5rem 0;
 	}
 	.key-dates {
@@ -195,14 +195,14 @@
 		font-size: 0.9rem;
 	}
 	.view-button {
-		background-color: #007bff;
+		background-color: var(--color-primary);
 	}
 	.edit-button {
-		background-color: #ffc107;
-		color: #212529;
+		background-color: var(--color-warning);
+		color: var(--color-warning-text);
 	}
 	.delete-button {
-		background-color: #dc3545;
+		background-color: var(--color-danger);
 	}
 	.status-badge {
 		display: inline-block;
@@ -215,19 +215,19 @@
 		margin-top: 0.25rem; /* Align better with h2 */
 	}
 	.status-active {
-		background-color: #28a745; /* Green */
+		background-color: var(--status-active);
 	}
 	.status-expiring {
-		background-color: #ffc107; /* Yellow */
-		color: #212529;
+		background-color: var(--status-expiring);
+		color: var(--color-warning-text);
 	}
 	.status-expired {
-		background-color: #dc3545; /* Red */
+		background-color: var(--status-expired);
 	}
 	.status-renews {
-		background-color: #17a2b8; /* Teal */
+		background-color: var(--status-renews);
 	}
 	.status-renewing-soon {
-		background-color: #6f42c1; /* Purple */
+		background-color: var(--status-renewing-soon);
 	}
 </style>

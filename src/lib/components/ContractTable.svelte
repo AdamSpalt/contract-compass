@@ -236,12 +236,12 @@
 	td {
 		padding: 0.75rem;
 		text-align: left;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--color-border);
 		vertical-align: middle;
 	}
 
 	tbody tr:hover {
-		background-color: #f5f5f5; /* Light grey for hover effect */
+		background-color: var(--color-bg); /* Light grey for hover effect */
 		transition: background-color 0.2s ease-in-out;
 	}
 
@@ -305,7 +305,7 @@
 	}
 
 	th {
-		background-color: #f9f9f9;
+		background-color: var(--color-bg);
 		font-weight: 600;
 	}
 	.details-link,
@@ -322,12 +322,12 @@
 	}
 	.details-link,
 	.file-link {
-		background-color: #007bff;
+		background-color: var(--color-primary);
 		color: white;
 		text-decoration: none;
 	}
 	.details-link {
-		background-color: #0056b3; /* A different, darker blue */
+		background-color: var(--color-text-secondary); /* A different, darker blue */
 	}
 	.actions-wrapper {
 		display: flex;
@@ -344,19 +344,19 @@
 		color: #fff;
 	}
 	.status-active {
-		background-color: #28a745; /* Green */
+		background-color: var(--status-active); /* Green */
 	}
 	.status-expiring {
-		background-color: #ffc107; /* Yellow */
-		color: #212529;
+		background-color: var(--status-expiring); /* Yellow */
+		color: var(--color-warning-text);
 	}
 	.status-expired {
-		background-color: #dc3545; /* Red */
+		background-color: var(--status-expired); /* Red */
 	}
 	.status-renews {
-		background-color: #17a2b8; /* Teal */
+		background-color: var(--status-renews); /* Teal */
 	}
 	.status-renewing-soon {
-		background-color: #6f42c1; /* Purple */
+		background-color: var(--status-renewing-soon); /* Purple */
 	}
 </style>

@@ -1,4 +1,42 @@
-/* Write your global styles here, in PostCSS syntax */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Import Google Font - A clean, modern sans-serif font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Define CSS Custom Properties (Variables) for the new design system */
+:root {
+	/* Color Palette */
+	--color-primary: #3b82f6; /* A modern, slightly desaturated blue */
+	--color-primary-hover: #2563eb;
+	--color-accent: #10b981; /* Vibrant green for "Add New" */
+	--color-accent-hover: #059669;
+	--color-danger: #ef4444;
+	--color-danger-hover: #dc2626;
+	--color-warning: #f59e0b;
+	--color-warning-text: #1f2937;
+
+	/* Neutral Colors */
+	--color-bg: #f8fafc; /* Light gray background */
+	--color-surface: #ffffff; /* White for cards */
+	--color-border: #e5e7eb; /* Light gray for borders */
+	--color-text-primary: #1f2937; /* Dark gray for primary text */
+	--color-text-secondary: #6b7280; /* Lighter gray for secondary text */
+	--color-text-subtle: #9ca3af;
+
+	/* Status Colors */
+	--status-active: #22c55e;
+	--status-expiring: var(--color-warning);
+	--status-expired: var(--color-danger);
+	--status-renews: #3b82f6;
+	--status-renewing-soon: #8b5cf6;
+
+	/* UI Elements */
+	--border-radius: 8px;
+	--box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+body {
+	font-family: 'Inter', sans-serif;
+	background-color: var(--color-bg);
+	color: var(--color-text-primary);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
