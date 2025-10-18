@@ -39,9 +39,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		// In case of an error, return a default structure that matches the success case.
 		// The page component expects these values to be nested under a `data` property.
 		return {
+			totalActiveContractValue: 0,
 			monthlyRecurringCost: 0,
-			totalAnnualizedSpend: 0,
-			oneTimeSpendInRange: 0, // This will be removed, but need to keep shape for now
+			totalSpendInRange: 0,
 			spendByType: [],
 			spendTrend: { labels: [], data: [] },
 			top5Contracts: [],
@@ -50,30 +50,25 @@ export const load: PageServerLoad = async ({ url }) => {
 	}
 
 	// --- KPI Calculations ---
-	// Note: Annualized and Monthly Recurring costs are snapshots of *current* commitments.
-	// These are intentionally NOT affected by the date range filter.
+	// Note: ACV and MRC are snapshots of *current* commitments.
+	// They are intentionally NOT affected by the date range filter.
 
 	// Filter for contracts that are currently active.
 	const currentlyActiveContracts = (contracts ?? []).filter((c) => {
-		if (!c.end_date) return true; // No end date means it's active
-		return !isPast(new Date(c.end_date + 'T00:00:00'));
+		if (!c.start_date) return false; // A contract can't be active without a start date.
+		const today = new Date();
+		const contractStart = parseISO(c.start_date);
+		const contractEnd = c.end_date ? parseISO(c.end_date) : new Date('2999-12-31');
+		return contractStart <= today && today <= contractEnd;
 	});
 
 	const monthlyRecurringCost = currentlyActiveContracts
 		.filter((c) => c.payment_terms === 'monthly' && c.contract_value)
 		.reduce((sum, c) => sum + c.contract_value, 0);
 
-	const totalAnnualizedSpend = currentlyActiveContracts
-		.filter((c) => c.payment_terms === 'monthly' || c.payment_terms === 'yearly' || c.payment_terms === 'one_time')
-		.reduce((sum, c) => {
-			if (c.payment_terms === 'monthly' && c.contract_value) {
-				return sum + c.contract_value * 12;
-			}
-			if (c.payment_terms === 'yearly' && c.contract_value) {
-				return sum + c.contract_value;
-			}
-			return sum;
-		}, 0);
+	const totalActiveContractValue = currentlyActiveContracts.reduce((sum, c) => {
+		return sum + (c.contract_value || 0);
+	}, 0);
 
 	// --- Date Range Interval ---
 	// Establish the date interval for filtering. Default to the last 12 months if not provided.
@@ -94,23 +89,15 @@ export const load: PageServerLoad = async ({ url }) => {
 		return contractStart <= interval.end && contractEnd >= interval.start;
 	});
 
-	// --- KPI: One-Time Spend In Range ---
-	const oneTimeSpendInRange = contractsInDateRange
-		.filter(
-			(c) =>
-				c.payment_terms === 'one_time' &&
-				c.start_date &&
-				isWithinInterval(parseISO(c.start_date), interval)
-		)
-		.reduce((sum, c) => sum + (c.contract_value || 0), 0);
-
 	// --- Top 5 Contracts Calculation ---
 	// This is now based on contracts active within the selected date range.
 	const top5Contracts = [...contractsInDateRange]
 		.sort((a, b) => (b.contract_value || 0) - (a.contract_value || 0))
 		.slice(0, 5);
 
-	// --- Chart Data Calculations ---
+	// --- Chart & In-Range KPI Calculations ---
+	// Calculate spend for charts and the "Total Spend (in range)" KPI simultaneously.
+	let totalSpendInRange = 0;
 	const vendorSpend = new Map<string, number>();
 	const typeSpend = new Map<string, number>();
 	for (const contract of contractsInDateRange) {
@@ -149,13 +136,16 @@ export const load: PageServerLoad = async ({ url }) => {
 		if (spend > 0) {
 			vendorSpend.set(vendorName, (vendorSpend.get(vendorName) || 0) + spend);
 			typeSpend.set(typeName, (typeSpend.get(typeName) || 0) + spend);
+			totalSpendInRange += spend;
 		}
 	}
 
 	const spendByVendor = Array.from(vendorSpend, ([name, total]) => ({ name, total })).sort(
 		(a, b) => b.total - a.total
 	);
-	const spendByType = Array.from(typeSpend, ([name, total]) => ({ name, total }));
+	const spendByType = Array.from(typeSpend, ([name, total]) => ({ name, total })).sort(
+		(a, b) => b.total - a.total
+	);
 
 	// 2. Spend Trend (dynamically calculated for the selected interval)
 	const trendBuckets = new Map<string, number>();
@@ -207,9 +197,9 @@ export const load: PageServerLoad = async ({ url }) => {
 	const displayInterval = `${format(interval.start, 'MMM yyyy')} - ${format(interval.end, 'MMM yyyy')}`;
 
 	return {
+		totalActiveContractValue,
 		monthlyRecurringCost,
-		totalAnnualizedSpend,
-		oneTimeSpendInRange,
+		totalSpendInRange,
 		spendByVendor,
 		spendByType,
 		spendTrend,

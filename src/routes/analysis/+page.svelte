@@ -156,13 +156,19 @@
 			{
 				data: filteredContractTypeSpend.map((t) => t.total) ?? [],
 				backgroundColor: [
-					'rgba(255, 99, 132, 0.6)',
-					'rgba(54, 162, 235, 0.6)',
-					'rgba(255, 206, 86, 0.6)',
-					'rgba(75, 192, 192, 0.6)',
-					'rgba(153, 102, 255, 0.6)',
-					'rgba(255, 159, 64, 0.6)'
-				]
+					'rgba(255, 99, 132, 0.7)',
+					'rgba(54, 162, 235, 0.7)',
+					'rgba(255, 206, 86, 0.7)',
+					'rgba(75, 192, 192, 0.7)',
+					'rgba(153, 102, 255, 0.7)',
+					'rgba(255, 159, 64, 0.7)',
+					'rgba(30, 144, 255, 0.7)',
+					'rgba(0, 206, 209, 0.7)',
+					'rgba(60, 179, 113, 0.7)',
+					'rgba(218, 112, 214, 0.7)'
+				],
+				borderWidth: 2,
+				borderColor: '#fff'
 			}
 		]
 	});
@@ -171,13 +177,19 @@
 		responsive: true,
 		maintainAspectRatio: false,
 		plugins: {
+			legend: {
+				display: false
+			},
 			tooltip: {
 				callbacks: {
 					label: (context) => `${context.label}: ${formatCurrency(context.parsed)}`
 				}
 			}
-		}
+		},
+		cutout: '60%'
 	};
+
+	const totalTypeSpend = $derived(filteredContractTypeSpend.reduce((sum, item) => sum + item.total, 0));
 
 	// Data for the "Spend Trend" line chart
 	const spendTrendChartData = $derived({
@@ -252,16 +264,16 @@
 			tooltipText="A live snapshot of your current monthly recurring costs. This value is NOT affected by the date filter."
 		/>
 		<StatCard
-			label="Total Annualized Spend"
+			label="Total Active Contract Value"
 			subLabel="(Live Snapshot)"
-			value={formatCurrency(data?.totalAnnualizedSpend ?? 0)}
-			tooltipText="A live snapshot of your projected spend over the next 12 months. This value is NOT affected by the date filter."
+			value={formatCurrency(data?.totalActiveContractValue ?? 0)}
+			tooltipText="The total face value of all contracts that are currently active, regardless of payment terms. This value is NOT affected by the date filter."
 		/>
 		<StatCard
-			label="One-Time Spend (in range)"
+			label="Total Spend"
 			subLabel="(In Selected Range)"
-			value={formatCurrency(data?.oneTimeSpendInRange ?? 0)}
-			tooltipText="The total value of contracts with a 'one-time' payment term that started in the selected date range."
+			value={formatCurrency(data?.totalSpendInRange ?? 0)}
+			tooltipText="The total actual spend that occurred within the selected date range. This includes prorated monthly costs and any yearly/one-time costs that occurred in the period."
 		/>
 	</div>
 
@@ -331,8 +343,31 @@
 					{/if}
 				</div>
 			</div>
-			<div class="chart-inner-container">
-				<Chart type="doughnut" data={spendByTypeChartData} options={spendByTypeChartOptions} />
+			<div class="doughnut-container">
+				<div class="doughnut-chart-area">
+					{#if filteredContractTypeSpend.length > 0}
+						<Chart type="doughnut" data={spendByTypeChartData} options={spendByTypeChartOptions} />
+					{:else}
+						<p class="no-data-placeholder">No contract types to display for the current selection.</p>
+					{/if}
+				</div>
+				{#if filteredContractTypeSpend.length > 0}
+					<div class="custom-legend">
+						<ul>
+							{#each filteredContractTypeSpend as item, i}
+								<li>
+									<span
+										class="legend-color-box"
+										style="background-color: {spendByTypeChartData.datasets[0].backgroundColor[i % spendByTypeChartData.datasets[0].backgroundColor.length]}"
+									></span>
+									<span class="legend-label">{item.name}</span>
+									<span class="legend-value">{formatCurrency(item.total)}</span>
+									<span class="legend-percentage">({((item.total / totalTypeSpend) * 100).toFixed(1)}%)</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -645,6 +680,66 @@
 		color: #005a9e;
 		padding: 0.25rem 0.6rem;
 		border-radius: 12px;
+	}
+
+	.doughnut-container {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.doughnut-chart-area {
+		height: 220px; /* Adjust chart height */
+		position: relative;
+	}
+
+	.custom-legend {
+		overflow-y: auto;
+		flex-grow: 1; /* Take remaining space */
+		padding-top: 1rem;
+		border-top: 1px solid #eee;
+		margin-top: 1rem;
+	}
+
+	.custom-legend ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.custom-legend li {
+		display: grid;
+		grid-template-columns: auto 1fr auto auto;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+	}
+
+	.legend-color-box {
+		width: 12px;
+		height: 12px;
+		border-radius: 3px;
+	}
+
+	.legend-label {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		color: #333;
+	}
+
+	.legend-value {
+		font-weight: 500;
+		justify-self: end;
+	}
+	.legend-percentage {
+		color: #666;
+		font-size: 0.8rem;
+		width: 45px; /* Align percentages */
+		text-align: right;
 	}
 
 	@media (max-width: 900px) {
