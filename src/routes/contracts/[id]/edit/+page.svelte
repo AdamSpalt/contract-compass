@@ -9,6 +9,15 @@
 	// Initialize startDate from contract data
 	let startDate: string = contract.start_date ?? '';
 
+	// Initialize contractType and contractSubtype from the loaded contract data
+	let contractType: 'Insurance' | 'Subscription' | 'Other' = contract.contract_type ?? 'Other';
+	let contractSubtype: string = contract.contract_subtype ?? '';
+
+	const subTypeMap = {
+		Insurance: ['Car insurance', 'Home insurance', 'Health insurance', 'Personal Injury']
+		// Future sub-types for other categories can be added here
+	};
+
 	// Initialize the radio button state based on the loaded data
 	let endDateType: 'specific' | 'monthly' | 'yearly' = contract.renewal_type
 		? contract.renewal_type
@@ -17,6 +26,13 @@
 	// Reactively calculate the end date if 'yearly' is selected and a start date exists
 	$: calculatedEndDate =
 		endDateType === 'yearly' && startDate ? format(addYears(new Date(startDate), 1), 'yyyy-MM-dd') : contract.end_date ?? '';
+
+	// When the main contract type changes, reset the sub-type if it's no longer relevant.
+	$: {
+		if (contractType !== 'Insurance') {
+			contractSubtype = '';
+		}
+	}
 </script>
 
 <main>
@@ -30,12 +46,23 @@
 		</div>
 		<div class="form-group">
 			<label for="contract_type">Contract Type</label>
-			<select id="contract_type" name="contract_type" value={contract.contract_type ?? 'Other'}>
+			<select id="contract_type" name="contract_type" bind:value={contractType}>
 				<option value="Insurance">Insurance</option>
 				<option value="Subscription">Subscription</option>
 				<option value="Other">Other</option>
 			</select>
 		</div>
+		{#if contractType === 'Insurance'}
+			<div class="form-group">
+				<label for="contract_subtype">Insurance Sub-Type</label>
+				<select id="contract_subtype" name="contract_subtype" bind:value={contractSubtype} required>
+					<option value="" disabled>Select a sub-type</option>
+					{#each subTypeMap.Insurance as subType}
+						<option value={subType}>{subType}</option>
+					{/each}
+				</select>
+			</div>
+		{/if}
 		<div class="form-group">
 			<label for="vendor_name">Vendor Name</label>
 			<input type="text" id="vendor_name" name="vendor_name" value={contract.vendor_name ?? ''} />

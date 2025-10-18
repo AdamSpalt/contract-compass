@@ -44,6 +44,9 @@
 		</div>
 		<p><strong>Vendor:</strong> {contract.vendor_name ?? 'N/A'}</p>
 		<p><strong>Contract Type:</strong> {contract.contract_type ?? 'N/A'}</p>
+		{#if contract.contract_subtype}
+			<p><strong>Sub-Type:</strong> {contract.contract_subtype}</p>
+		{/if}
 		<p><strong>Contract Number:</strong> {contract.contract_number ?? 'N/A'}</p>
 
 		<hr />

@@ -8,6 +8,7 @@
 		id: number;
 		contract_name: string | null;
 		vendor_name: string | null;
+		contract_subtype: string | null;
 		start_date: string | null;
 		end_date: string | null;
 		file_path: string | null;
@@ -27,11 +28,13 @@
 	import { format, differenceInDays, isPast } from 'date-fns';
 	import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 	export let contracts: Contract[];
+	export let showSubtypeColumn: boolean = true;
 
 	type SortableColumn =
 		// Defines which columns in the table can be sorted.
 		| 'contract_name'
 		| 'vendor_name'
+		| 'contract_subtype'
 		| 'start_date'
 		| 'end_date'
 		| 'contract_value'
@@ -111,7 +114,7 @@
 
 <!-- SECTION 3: HTML STRUCTURE & DISPLAY -->
 <!-- This section defines the visual layout of the table. -->
-<table>
+<table class:no-subtype-column={!showSubtypeColumn}>
 	<thead>
 		<!-- Table Headers -->
 		<!-- Each `th` (table header) is clickable to trigger the sorting logic. -->
@@ -124,6 +127,12 @@
 				Vendor
 				{#if sortColumn === 'vendor_name'}<span>{sortDirection === 'asc' ? '▲' : '▼'}</span>{/if}
 			</th>
+			{#if showSubtypeColumn}
+				<th on:click={() => handleSort('contract_subtype')} class="sortable" class:active-sort={sortColumn === 'contract_subtype'}>
+					Sub-Type
+					{#if sortColumn === 'contract_subtype'}<span>{sortDirection === 'asc' ? '▲' : '▼'}</span>{/if}
+				</th>
+			{/if}
 			<th on:click={() => handleSort('start_date')} class="sortable" class:active-sort={sortColumn === 'start_date'}>
 				Start Date
 				{#if sortColumn === 'start_date'}<span>{sortDirection === 'asc' ? '▲' : '▼'}</span>{/if}
@@ -154,6 +163,9 @@
 			<tr>
 				<td>{contract.contract_name ?? 'N/A'}</td>
 				<td>{contract.vendor_name ?? 'N/A'}</td>
+				{#if showSubtypeColumn}
+					<td>{contract.contract_subtype ?? 'N/A'}</td>
+				{/if}
 				<td>
 					{#if contract.start_date}
 						<!-- Dates are formatted for readability using the 'date-fns' library. -->
@@ -234,14 +246,26 @@
 	}
 
 	/* Define explicit widths for each column to ensure alignment */
-	th:nth-child(1) { width: 22%; } /* Contract Name */
-	th:nth-child(2) { width: 14%; } /* Vendor */
-	th:nth-child(3) { width: 11%; } /* Start Date */
-	th:nth-child(4) { width: 11%; } /* End Date */
-	th:nth-child(5) { width: 11%; } /* Renewal */
-	th:nth-child(6) { width: 9%; }  /* Value */
-	th:nth-child(7) { width: 10%; } /* Status */
-	th:nth-child(8) { width: 12%; } /* Actions */
+	/* Default widths when Sub-Type column is visible */
+	:global(table:not(.no-subtype-column)) th:nth-child(1) { width: 20%; } /* Contract Name */
+	:global(table:not(.no-subtype-column)) th:nth-child(2) { width: 8%; } /* Vendor */
+	:global(table:not(.no-subtype-column)) th:nth-child(3) { width: 15%; } /* Sub-Type */
+	:global(table:not(.no-subtype-column)) th:nth-child(4) { width: 11%; } /* Start Date */
+	:global(table:not(.no-subtype-column)) th:nth-child(5) { width: 11%; } /* End Date */
+	:global(table:not(.no-subtype-column)) th:nth-child(6) { width: 10%; } /* Renewal */
+	:global(table:not(.no-subtype-column)) th:nth-child(7) { width: 9%; }  /* Value */
+	:global(table:not(.no-subtype-column)) th:nth-child(8) { width: 8%; }  /* Status */
+	:global(table:not(.no-subtype-column)) th:nth-child(9) { width: 7%; }  /* Actions */
+
+	/* Adjusted widths when Sub-Type column is hidden */
+	:global(table.no-subtype-column) th:nth-child(1) { width: 20%; } /* Contract Name */
+	:global(table.no-subtype-column) th:nth-child(2) { width: 25%; } /* Vendor */
+	:global(table.no-subtype-column) th:nth-child(3) { width: 11%; } /* Start Date */
+	:global(table.no-subtype-column) th:nth-child(4) { width: 11%; } /* End Date */
+	:global(table.no-subtype-column) th:nth-child(5) { width: 11%; } /* Renewal */
+	:global(table.no-subtype-column) th:nth-child(6) { width: 9%; } /* Value */
+	:global(table.no-subtype-column) th:nth-child(7) { width: 8%; }  /* Status */
+	:global(table.no-subtype-column) th:nth-child(8) { width: 7%; }  /* Actions */
 
 	/* Ensure date columns don't wrap, keeping them on a single line */
 	th:nth-child(3),

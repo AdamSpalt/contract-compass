@@ -43,6 +43,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			monthlyRecurringCost: 0,
 			totalSpendInRange: 0,
 			spendByType: [],
+			spendBySubtype: [],
 			spendTrend: { labels: [], data: [] },
 			top5Contracts: [],
 			displayInterval: ''
@@ -100,11 +101,13 @@ export const load: PageServerLoad = async ({ url }) => {
 	let totalSpendInRange = 0;
 	const vendorSpend = new Map<string, number>();
 	const typeSpend = new Map<string, number>();
+	const subtypeSpend = new Map<string, number>();
 	for (const contract of contractsInDateRange) {
 		if (!contract.contract_value) continue;
 
 		const vendorName = contract.vendor_name || 'Unknown Vendor';
 		const typeName = contract.contract_type || 'Uncategorized';
+		const subtypeName = contract.contract_subtype;
 		let spend = 0;
 
 		if (contract.payment_terms === 'one_time' || contract.payment_terms === 'yearly') {
@@ -136,6 +139,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		if (spend > 0) {
 			vendorSpend.set(vendorName, (vendorSpend.get(vendorName) || 0) + spend);
 			typeSpend.set(typeName, (typeSpend.get(typeName) || 0) + spend);
+			if (subtypeName) {
+				subtypeSpend.set(subtypeName, (subtypeSpend.get(subtypeName) || 0) + spend);
+			}
 			totalSpendInRange += spend;
 		}
 	}
@@ -144,6 +150,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		(a, b) => b.total - a.total
 	);
 	const spendByType = Array.from(typeSpend, ([name, total]) => ({ name, total })).sort(
+		(a, b) => b.total - a.total
+	);
+	const spendBySubtype = Array.from(subtypeSpend, ([name, total]) => ({ name, total })).sort(
 		(a, b) => b.total - a.total
 	);
 
@@ -202,6 +211,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		totalSpendInRange,
 		spendByVendor,
 		spendByType,
+		spendBySubtype,
 		spendTrend,
 		top5Contracts,
 		displayInterval

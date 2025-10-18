@@ -20,6 +20,7 @@
 	let showFilters = false;
 	let statusFilter = 'all'; // 'all', 'Active', 'Expiring Soon', 'Expired', 'Auto-Renews'
 	let typeFilter = 'all'; // 'all', 'Insurance', 'Subscription', 'Other'
+	let subtypeFilter = 'all'; // 'all', 'Car insurance', etc.
 	let hasFile = false;
 	let startDateFilter = '';
 	let endDateFilter = '';
@@ -64,6 +65,7 @@
 		searchTerm !== '' ||
 		statusFilter !== 'all' ||
 		typeFilter !== 'all' ||
+		subtypeFilter !== 'all' ||
 		hasFile !== false ||
 		startDateFilter !== '' ||
 		endDateFilter !== '' ||
@@ -93,6 +95,11 @@
 		// 3. Type Filter
 		if (typeFilter !== 'all') {
 			if (c.contract_type !== typeFilter) return false;
+		}
+
+		// 3a. Sub-Type Filter
+		if (subtypeFilter !== 'all') {
+			if (c.contract_subtype !== subtypeFilter) return false;
 		}
 
 		// 4. Has File Filter
@@ -150,6 +157,7 @@
 		searchTerm = '';
 		statusFilter = 'all';
 		typeFilter = 'all';
+		subtypeFilter = 'all';
 		hasFile = false;
 		startDateFilter = '';
 		endDateFilter = '';
@@ -222,6 +230,18 @@
 						<option value="Other">Other</option>
 					</select>
 				</div>
+				{#if typeFilter === 'Insurance'}
+					<div class="filter-group">
+						<label for="subtype-filter">Insurance Sub-Type</label>
+						<select id="subtype-filter" bind:value={subtypeFilter}>
+							<option value="all">All Sub-Types</option>
+							<option value="Car insurance">Car insurance</option>
+							<option value="Home insurance">Home insurance</option>
+							<option value="Health insurance">Health insurance</option>
+							<option value="Personal Injury">Personal Injury</option>
+						</select>
+					</div>
+				{/if}
 				<div class="filter-group">
 					<label for="start-date-filter">Start Date</label>
 					<input type="date" id="start-date-filter" bind:value={startDateFilter} />
@@ -271,7 +291,7 @@
 			<h2>Insurance</h2>
 			{#if hasAnyInsuranceContracts}
 				{#if insuranceContracts.length > 0}
-					<ContractTable contracts={insuranceContracts} />
+					<ContractTable contracts={insuranceContracts} showSubtypeColumn={true} />
 				{:else}
 					<p class="empty-section-placeholder">No Insurance contracts match the current filters.</p>
 				{/if}
@@ -286,7 +306,7 @@
 			<h2>Subscriptions</h2>
 			{#if hasAnySubscriptionContracts}
 				{#if subscriptionContracts.length > 0}
-					<ContractTable contracts={subscriptionContracts} />
+					<ContractTable contracts={subscriptionContracts} showSubtypeColumn={false} />
 				{:else}
 					<p class="empty-section-placeholder">No Subscription contracts match the current filters.</p>
 				{/if}
@@ -301,7 +321,7 @@
 			<h2>Other</h2>
 			{#if hasAnyOtherContracts}
 				{#if otherContracts.length > 0}
-					<ContractTable contracts={otherContracts} />
+					<ContractTable contracts={otherContracts} showSubtypeColumn={false} />
 				{:else}
 					<p class="empty-section-placeholder">No "Other" contracts match the current filters.</p>
 				{/if}

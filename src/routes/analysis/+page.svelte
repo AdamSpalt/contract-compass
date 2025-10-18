@@ -59,10 +59,16 @@
 	let selectedContractTypes = $state([...allContractTypes]);
 	let isTypeDropdownOpen = $state(false);
 
+	// --- Contract Sub-Type Filter State ---
+	const allSubtypes = $derived(data?.spendBySubtype.map((st) => st.name) ?? []);
+	let selectedSubtypes = $state([...allSubtypes]);
+	let isSubtypeDropdownOpen = $state(false);
+
 	// --- Click Outside Logic ---
 	// This section handles closing the dropdown when the user clicks outside of it.
 	let vendorFilterElement: HTMLDivElement; // A reference to the dropdown's container element.
 	let typeFilterElement: HTMLDivElement; // A reference to the type dropdown's container element.
+	let subtypeFilterElement: HTMLDivElement; // A reference to the subtype dropdown's container element.
 
 	/**
 	 * Closes the vendor dropdown if a click occurs outside of its container element.
@@ -71,6 +77,7 @@
 	function handleClickOutside(event: MouseEvent) {
 		if (vendorFilterElement && !vendorFilterElement.contains(event.target as Node)) isVendorDropdownOpen = false;
 		if (typeFilterElement && !typeFilterElement.contains(event.target as Node)) isTypeDropdownOpen = false;
+		if (subtypeFilterElement && !subtypeFilterElement.contains(event.target as Node)) isSubtypeDropdownOpen = false;
 	}
 	// When the data from the server changes (e.g., due to date filter), reset selected vendors.
 	$effect(() => {
@@ -80,6 +87,11 @@
 	// When the data from the server changes, reset selected contract types.
 	$effect(() => {
 		selectedContractTypes = [...allContractTypes];
+	});
+
+	// When the data from the server changes, reset selected contract sub-types.
+	$effect(() => {
+		selectedSubtypes = [...allSubtypes];
 	});
 
 	/**
@@ -96,6 +108,9 @@
 
 	// A derived list of contract type spend data that is filtered by the user's checkbox selections.
 	const filteredContractTypeSpend = $derived(data?.spendByType.filter((t) => selectedContractTypes.includes(t.name)) ?? []);
+
+	// A derived list of contract sub-type spend data that is filtered by the user's checkbox selections.
+	const filteredSubtypeSpend = $derived(data?.spendBySubtype.filter((st) => selectedSubtypes.includes(st.name)) ?? []);
 
 	// --- Chart Data & Options ---
 
@@ -191,6 +206,48 @@
 
 	const totalTypeSpend = $derived(filteredContractTypeSpend.reduce((sum, item) => sum + item.total, 0));
 
+	// Data for the "Spend by Sub-Type" donut chart
+	const spendBySubtypeChartData = $derived({
+		labels: filteredSubtypeSpend.map((t) => t.name) ?? [],
+		datasets: [
+			{
+				data: filteredSubtypeSpend.map((t) => t.total) ?? [],
+				backgroundColor: [
+					'rgba(75, 192, 192, 0.7)',
+					'rgba(153, 102, 255, 0.7)',
+					'rgba(255, 159, 64, 0.7)',
+					'rgba(255, 99, 132, 0.7)',
+					'rgba(54, 162, 235, 0.7)',
+					'rgba(255, 206, 86, 0.7)',
+					'rgba(30, 144, 255, 0.7)',
+					'rgba(0, 206, 209, 0.7)',
+					'rgba(60, 179, 113, 0.7)',
+					'rgba(218, 112, 214, 0.7)'
+				],
+				borderWidth: 2,
+				borderColor: '#fff'
+			}
+		]
+	});
+
+	const spendBySubtypeChartOptions = {
+		responsive: true,
+		maintainAspectRatio: false,
+		plugins: {
+			legend: {
+				display: false
+			},
+			tooltip: {
+				callbacks: {
+					label: (context) => `${context.label}: ${formatCurrency(context.parsed)}`
+				}
+			}
+		},
+		cutout: '60%'
+	};
+
+	const totalSubtypeSpend = $derived(filteredSubtypeSpend.reduce((sum, item) => sum + item.total, 0));
+
 	// Data for the "Spend Trend" line chart
 	const spendTrendChartData = $derived({
 		labels: data?.spendTrend.labels ?? [],
@@ -285,41 +342,6 @@
 				<span>Loading new data...</span>
 			</div>
 		{/if}
-		<div class="chart-wrapper large">
-			<div class="chart-header">
-				<h2>Spend by Vendor (Top 10)</h2>
-				<div class="vendor-filter" bind:this={vendorFilterElement}>
-					<button class="dropdown-toggle" onclick={() => (isVendorDropdownOpen = !isVendorDropdownOpen)}>
-						<span>{selectedVendors.length} of {allVendors.length} vendors selected</span>
-						<span class="dropdown-arrow">{isVendorDropdownOpen ? '▲' : '▼'}</span>
-					</button>
-					{#if isVendorDropdownOpen}
-						<div class="dropdown-content">
-							<div class="vendor-filter-actions">
-								<button class="link-button" onclick={() => (selectedVendors = [...allVendors])}>Select All</button>
-								<button class="link-button" onclick={() => (selectedVendors = [])}>Deselect All</button>
-							</div>
-							<div class="vendor-checkboxes">
-								{#each allVendors as vendor}
-									<label>
-										<input type="checkbox" bind:group={selectedVendors} value={vendor} />
-										{vendor}
-									</label>
-								{/each}
-							</div>
-						</div>
-					{/if}
-				</div>
-			</div>
-			<div class="chart-inner-container">
-				{#if filteredVendorSpend.length > 0}
-					<Chart type="bar" data={spendByVendorChartData} options={spendByVendorChartOptions} />
-				{:else}
-					<p class="no-data-placeholder">No vendors to display for the current selection.</p>
-				{/if}
-			</div>
-		</div>
-
 		<div class="chart-wrapper">
 			<div class="chart-header">
 				<h2>Spend by Contract Type</h2>
@@ -371,7 +393,93 @@
 			</div>
 		</div>
 
-		<div class="chart-wrapper large">
+		<div class="chart-wrapper">
+			<div class="chart-header">
+				<h2>Spend by Insurance type</h2>
+				<div class="vendor-filter" bind:this={subtypeFilterElement}>
+					<button class="dropdown-toggle" onclick={() => (isSubtypeDropdownOpen = !isSubtypeDropdownOpen)}>
+						<span>{selectedSubtypes.length} of {allSubtypes.length} sub-types selected</span>
+						<span class="dropdown-arrow">{isSubtypeDropdownOpen ? '▲' : '▼'}</span>
+					</button>
+					{#if isSubtypeDropdownOpen}
+						<div class="dropdown-content">
+							<div class="vendor-filter-actions">
+								<button class="link-button" onclick={() => (selectedSubtypes = [...allSubtypes])}>Select All</button>
+								<button class="link-button" onclick={() => (selectedSubtypes = [])}>Deselect All</button>
+							</div>
+							<div class="vendor-checkboxes">
+								{#each allSubtypes as subtype}
+									<label><input type="checkbox" bind:group={selectedSubtypes} value={subtype} />{subtype}</label>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
+			</div>
+			<div class="doughnut-container">
+				<div class="doughnut-chart-area">
+					{#if filteredSubtypeSpend.length > 0}
+						<Chart type="doughnut" data={spendBySubtypeChartData} options={spendBySubtypeChartOptions} />
+					{:else}
+						<p class="no-data-placeholder">No sub-types to display for the current selection.</p>
+					{/if}
+				</div>
+				{#if filteredSubtypeSpend.length > 0}
+					<div class="custom-legend">
+						<ul>
+							{#each filteredSubtypeSpend as item, i}
+								<li>
+									<span
+										class="legend-color-box"
+										style="background-color: {spendBySubtypeChartData.datasets[0].backgroundColor[i % spendBySubtypeChartData.datasets[0].backgroundColor.length]}"
+									></span>
+									<span class="legend-label">{item.name}</span>
+									<span class="legend-value">{formatCurrency(item.total)}</span>
+									<span class="legend-percentage">({((item.total / totalSubtypeSpend) * 100).toFixed(1)}%)</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+			</div>
+		</div>
+
+		<div class="chart-wrapper full-width">
+			<div class="chart-header">
+				<h2>Spend by Vendor (Top 10)</h2>
+				<div class="vendor-filter" bind:this={vendorFilterElement}>
+					<button class="dropdown-toggle" onclick={() => (isVendorDropdownOpen = !isVendorDropdownOpen)}>
+						<span>{selectedVendors.length} of {allVendors.length} vendors selected</span>
+						<span class="dropdown-arrow">{isVendorDropdownOpen ? '▲' : '▼'}</span>
+					</button>
+					{#if isVendorDropdownOpen}
+						<div class="dropdown-content">
+							<div class="vendor-filter-actions">
+								<button class="link-button" onclick={() => (selectedVendors = [...allVendors])}>Select All</button>
+								<button class="link-button" onclick={() => (selectedVendors = [])}>Deselect All</button>
+							</div>
+							<div class="vendor-checkboxes">
+								{#each allVendors as vendor}
+									<label>
+										<input type="checkbox" bind:group={selectedVendors} value={vendor} />
+										{vendor}
+									</label>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
+			</div>
+			<div class="chart-inner-container">
+				{#if filteredVendorSpend.length > 0}
+					<Chart type="bar" data={spendByVendorChartData} options={spendByVendorChartOptions} />
+				{:else}
+					<p class="no-data-placeholder">No vendors to display for the current selection.</p>
+				{/if}
+			</div>
+		</div>
+
+		<div class="chart-wrapper">
 			<div class="chart-header">
 				<h2>Total Spend Trend</h2>
 			</div>
@@ -471,7 +579,7 @@
 
 	.charts-container {
 		display: grid;
-		grid-template-columns: 2fr 1fr;
+		grid-template-columns: 1fr 1fr;
 		gap: 1.5rem;
 	}
 

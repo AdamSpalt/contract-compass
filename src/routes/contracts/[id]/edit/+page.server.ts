@@ -44,6 +44,7 @@ export const actions: Actions = {
 			.update({
 				contract_name: contractName,
 				contract_type: formData.get('contract_type') as string,
+				contract_subtype: (formData.get('contract_subtype') as string) || null,
 				vendor_name: formData.get('vendor_name') as string,
 				contract_number: formData.get('contract_number') as string,
 				start_date: startDate || null,

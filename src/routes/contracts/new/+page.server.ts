@@ -29,6 +29,7 @@ export const actions: Actions = {
 		const contractData = {
 			contract_name: formData.get('contract_name') as string,
 			contract_type: formData.get('contract_type') as string,
+			contract_subtype: (formData.get('contract_subtype') as string) || null,
 			vendor_name: formData.get('vendor_name') as string,
 			contract_number: formData.get('contract_number') as string,
 			start_date: formData.get('start_date') || null,
