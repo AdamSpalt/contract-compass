@@ -34,7 +34,7 @@ This project is built with a modern technology stack, making it fast, reliable, 
 
 ## Use Cases
 
-As a Business Analyst or a professional managing multiple contracts, you can use Contract Compass to:
+As a Person managing multiple contracts (insurance policies/subscriptions), you can use Contract Compass to:
 
 - **Monitor Contract Lifecycles**: Keep track of all active contracts and their end dates to plan for renewals or terminations.
 - **Quickly Access Contract Information**: The main dashboard provides an at-a-glance view of your contract portfolio.
