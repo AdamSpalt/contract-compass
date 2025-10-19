@@ -14,6 +14,7 @@ This project is built with a modern technology stack, making it fast, reliable, 
   - [Frontend](#frontend)
   - [Backend](#backend)
   - [Database](#database)
+- [Deployment & Automation](#deployment--automation)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -27,6 +28,7 @@ This project is built with a modern technology stack, making it fast, reliable, 
 - **Centralized Contract Dashboard**: View all your contracts in a single, organized list.
 - **Sorted by Expiration**: Contracts are automatically sorted by their end date, allowing you to easily see which ones require attention soon.
 - **Secure File Handling**: Upload and securely access contract documents.
+- **Automated Email Reminders**: Automatically sends email notifications 30, 14, and 7 days before a contract's end date to ensure timely renewals.
 - **Scalable Backend**: Built on Supabase for robust data management and authentication.
 - **Modern Web Experience**: Fast and responsive user interface built with SvelteKit.
 
@@ -54,11 +56,20 @@ Contract Compass is a full-stack application built using SvelteKit, with Supabas
 - **[Node.js](https://nodejs.org/)**: The server-side logic in SvelteKit runs on Node.js.
 - **Server-Side Rendering (SSR)**: The initial page load is rendered on the server (`+page.server.ts`) for faster performance and better SEO. The server fetches all contracts from the database before sending the page to the client.
 - **API Endpoints**: SvelteKit endpoints are used to handle specific server-side tasks, such as serving uploaded files. The endpoint at `src/routes/+server.ts` is responsible for securely streaming files from a private `uploads` directory.
+- **Automated Reminders (Supabase Edge Function)**: A serverless Edge Function (`email-reminder`) contains the logic for the automated reminder system. It queries the database for contracts nearing their end date and dispatches emails.
+- **Task Scheduling (pg_cron)**: A cron job scheduled with the `pg_cron` extension within the Supabase database triggers the `email-reminder` function once every day, making the process fully automated.
+- **Email Delivery (Resend)**: The Resend service is integrated into the Edge Function to send formatted HTML email reminders with dynamic links back to the application.
 
 ### Database
 
 - **Supabase**: Supabase is used as the backend data store. It's a powerful open-source Firebase alternative that provides a PostgreSQL database, authentication, and auto-generated APIs.
-- **Data Model**: The primary data entity is `contracts`, which stores information about each contract, including its `end_date`.
+- **Data Model**: The primary data entity is `contracts`, which stores information about each contract. It includes an `end_date` for tracking expirations and boolean flags (`thirty_day_reminder_sent`, `fourteen_day_reminder_sent`, `seven_day_reminder_sent`) to prevent duplicate reminders.
+
+## Deployment & Automation
+
+- **Vercel**: The SvelteKit frontend is deployed on Vercel, which connects to the project's GitHub repository for continuous deployment.
+- **Supabase CLI**: The Supabase CLI is used to deploy the Edge Function and manage database secrets.
+- **GitHub Actions**: A GitHub Action workflow is set up to automatically deploy the `email-reminder` function to Supabase whenever changes are pushed to its directory, ensuring the backend logic is always up-to-date.
 
 ## Project Structure
 
@@ -73,7 +84,11 @@ The project follows the standard SvelteKit directory structure:
 │   └── routes/
 │       ├── +page.svelte     # Main dashboard UI component
 │       ├── +page.server.ts  # Server-side data loading for the dashboard
-│       └── +server.ts       # Endpoint for serving uploaded files
+│       └── +server.ts       # Endpoint for serving uploaded files (DEPRECATED/REPLACED)
+├── supabase/
+│   └── functions/
+│       └── email-reminder/
+│           └── index.ts     # Backend logic for sending email reminders
 ├── static/
 │   └── ...                  # Static assets
 └── uploads/
@@ -103,7 +118,11 @@ Follow these instructions to get a local copy of the project up and running.
 
 ### Environment Variables
 
-The application requires a connection to a Supabase project. Create a `.env` file in the root of your project and add your Supabase credentials:
+The project requires two sets of environment variables.
+
+#### Frontend Application (.env)
+
+Create a `.env` file in the root of your project for the SvelteKit application:
 
 ```env
 PUBLIC_SUPABASE_URL="your-supabase-project-url"
