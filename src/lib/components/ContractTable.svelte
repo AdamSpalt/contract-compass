@@ -29,6 +29,7 @@
 	import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 	export let contracts: Contract[];
 	export let showSubtypeColumn: boolean = true;
+	export let showViewFileButton: boolean = true; // New prop to control the button's visibility
 
 	type SortableColumn =
 		// Defines which columns in the table can be sorted.
@@ -211,7 +212,7 @@
 				<td>
 					<div class="actions-wrapper">
 						<!-- Action buttons to view the contract file or see more details. -->
-						{#if contract.file_path}
+						{#if showViewFileButton && contract.file_path}
 							<a href="{PUBLIC_SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{contract.file_path}" target="_blank" rel="noopener noreferrer" class="file-link"
 								>View File</a
 							>

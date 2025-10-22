@@ -33,13 +33,22 @@
 			contractSubtype = '';
 		}
 	}
+
+	// Helper function to extract the readable file name from the stored path
+	function getFileName(filePath: string | null): string {
+		if (!filePath) return '';
+		const parts = filePath.split('-');
+		// Assuming the format is timestamp-filename.ext, we take everything after the first hyphen
+		// If there's no hyphen, return the full path as a fallback
+		return parts.length > 1 ? parts.slice(1).join('-') : filePath;
+	}
 </script>
 
 <main>
 	<h1>Edit Contract</h1>
 	<a href="/contracts/{contract.id}" class="back-link">&larr; Back to Details</a>
 
-	<form method="POST" enctype="multipart/form-data">
+	<form method="POST" action="?/update" enctype="multipart/form-data">
 		<div class="form-group">
 			<label for="contract_name">Contract Name</label>
 			<input type="text" id="contract_name" name="contract_name" value={contract.contract_name ?? ''} required />
@@ -72,12 +81,10 @@
 			<input type="text" id="contract_number" name="contract_number" value={contract.contract_number ?? ''} />
 		</div>
 		<div class="form-group">
-			<label for="start_date">Start Date</label>
-			<input type="date" id="start_date" name="start_date" bind:value={startDate} />
+			<label for="vendor_link">Vendor Website Link (Optional)</label>
+			<input type="url" id="vendor_link" name="vendor_link" value={contract.vendor_link ?? ''} placeholder="e.g., https://www.example.com" />
 		</div>
-
-		<hr />
-
+        <hr />
 		<div class="form-group">
 			<label for="contract_value">Contract Value (PLN)</label>
 			<input type="number" step="0.01" id="contract_value" name="contract_value" value={contract.contract_value ?? ''} placeholder="e.g. 1500" />
@@ -95,6 +102,11 @@
 		<div class="form-group">
 			<label for="notice_period_days">Notice Period (days)</label>
 			<input type="number" id="notice_period_days" name="notice_period_days" value={contract.notice_period_days ?? ''} placeholder="e.g. 30" />
+		</div>
+        <hr />
+		<div class="form-group">
+			<label for="start_date">Start Date</label>
+			<input type="date" id="start_date" name="start_date" bind:value={startDate} />
 		</div>
 
 		<div class="form-group">
@@ -131,19 +143,26 @@
 		<input type="hidden" name="renewal_type" value={endDateType === 'specific' ? '' : endDateType} />
 
 		<div class="form-group">
-			<label for="contract_file">Replace Contract File (Optional)</label>
 			{#if contract.file_path}
-				<p class="current-file">A file is already attached. Uploading a new one will replace it.</p>
+				<!-- This block shows when a file is already attached -->
+				<div class="attached-file-row">
+					<span class="attached-file-name">Attached: {getFileName(contract.file_path)}</span>
+					<form method="POST" action="?/removeFile" class="remove-file-form">
+						<button type="submit" class="remove-file-button">Remove</button>
+					</form>
+				</div>
+				<label for="contract_file">Replace File (Optional)</label>
+			{:else}
+				<!-- This block shows when no file is attached -->
+				<label for="contract_file">Upload File (Optional)</label>
 			{/if}
-			<input type="file" id="contract_file" name="contract_file" />
+			<div class="file-input-wrapper">
+				<input type="file" id="contract_file" name="contract_file" class="file-input" />
+			</div>
 		</div>
 
 		<button type="submit">Save Changes</button>
 
-		{#if form?.message}
-			<p class="error">Error: {form.message}</p>
-			<p class="error-details">{form.details}</p>
-		{/if}
 	</form>
 </main>
 
@@ -201,6 +220,13 @@
 		margin-top: -0.5rem;
 		margin-bottom: 0.5rem;
 	}
+	h4 {
+		margin-top: 2rem;
+		margin-bottom: 1rem;
+		color: #333;
+		border-bottom: 1px solid var(--color-border);
+		padding-bottom: 0.5rem;
+	}
 	button {
 		padding: 0.75rem 1.5rem;
 		background-color: var(--color-accent);
@@ -222,5 +248,35 @@
 	}
 	.error-details {
 		color: var(--color-text-secondary);
+	}
+	.remove-file-form {
+		margin-top: 0; /* Remove any default form margin */
+	}
+	.remove-file-button {
+		background-color: var(--color-danger);
+		padding: 0.5rem 1rem; /* Smaller padding */
+		font-size: 0.9rem; /* Smaller font */
+		font-weight: 500;
+	}
+	.remove-file-button:hover {
+		background-color: var(--color-danger-hover);
+	}
+	.file-input-wrapper {
+		margin-top: 0.5rem;
+	}
+	.file-input {
+		width: 100%;
+		box-sizing: border-box;
+	}
+	.attached-file-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.75rem;
+	}
+	.attached-file-name {
+		font-weight: 500;
+		color: var(--color-text-primary);
 	}
 </style>

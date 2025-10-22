@@ -66,6 +66,14 @@
 
 		<hr />
 
+		<h4>Vendor Contact</h4>
+		<div class="form-group">
+			<label for="vendor_link">Vendor Website Link (Optional)</label>
+			<input type="url" id="vendor_link" name="vendor_link" placeholder="e.g., https://www.example.com" />
+		</div>
+
+		<hr />
+
 		<h4>Financial Details</h4>
 		<div class="form-group">
 			<label for="contract_value">Contract Value ($)</label>

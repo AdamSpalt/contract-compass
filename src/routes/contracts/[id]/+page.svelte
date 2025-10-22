@@ -28,6 +28,12 @@
 			// It's just a normal active contract
 		}
 	}
+
+	function formatUrlForDisplay(fullUrl: string | null): string {
+		if (!fullUrl) return '';
+		// Remove the protocol (http://, https://) and any trailing slash for a cleaner look
+		return fullUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+	}
 </script>
 
 <main>
@@ -48,6 +54,12 @@
 			<p><strong>Sub-Type:</strong> {contract.contract_subtype}</p>
 		{/if}
 		<p><strong>Contract Number:</strong> {contract.contract_number ?? 'N/A'}</p>
+		{#if contract.vendor_link}
+			<p>
+				<strong>Vendor link:</strong>
+				<a href={contract.vendor_link} target="_blank" rel="noopener noreferrer">{formatUrlForDisplay(contract.vendor_link)}</a>
+			</p>
+		{/if}
 
 		<hr />
 		<h4>Financials</h4>

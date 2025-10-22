@@ -25,6 +25,7 @@ export const actions: Actions = {
 		const endDate = formData.get('end_date') as string;
 		const contractValue = formData.get('contract_value');
 		const noticePeriod = formData.get('notice_period_days');
+		const vendorLink = formData.get('vendor_link') as string;
 
 		const contractData = {
 			contract_name: formData.get('contract_name') as string,
@@ -36,6 +37,7 @@ export const actions: Actions = {
 			end_date: endDate || null,
 			renewal_type: renewalType || null,
 			file_path: filePath,
+			vendor_link: vendorLink || null,
 			contract_value: contractValue ? Number(contractValue) : null,
 			payment_terms: formData.get('payment_terms') as string,
 			notice_period_days: noticePeriod ? Number(noticePeriod) : null
