@@ -10,6 +10,7 @@
 	// This 'data' prop is automatically passed from your +page.ts load function
 	import ContractTable from '$lib/components/ContractTable.svelte';
 	import StatCard from '$lib/components/StatCard.svelte';
+	import DashboardControls from '$lib/components/DashboardControls.svelte';
 	import type { Contract } from '$lib/components/ContractTable.svelte';
 	import { isPast, differenceInDays } from 'date-fns';
 
@@ -200,14 +201,7 @@
 		/>
 	</div>
 
-	<div class="controls-container">
-		<input
-			type="text"
-			bind:value={searchTerm}
-			placeholder="Search by contract name or vendor..."
-		/>
-		<a href="/contracts/new" class="add-new-link">Add New Contract</a>
-	</div>
+	<DashboardControls bind:searchTerm />
 
 	<div class="filter-toggle-container">
 		<button class="filter-toggle-button" on:click={() => (showFilters = !showFilters)}>
@@ -357,31 +351,6 @@
 		gap: 1.5rem;
 		margin: 2rem 0;
 	}
-	.controls-container {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin: 1.5rem 0;
-	}
-	.controls-container input {
-		width: 50%;
-		padding: 0.75rem 1rem;
-		font-size: 1rem;
-		border-radius: 5px;
-		border: 1px solid var(--color-border);
-		box-sizing: border-box;
-	}
-
-	.add-new-link {
-		display: inline-block;
-		padding: 0.75rem 1.5rem;
-		margin-bottom: 2rem;
-		background-color: var(--color-accent);
-		color: white;
-		text-decoration: none;
-		border-radius: 5px;
-		font-weight: bold;
-	}
 	p {
 		color: var(--color-text-secondary);
 		margin-top: 1rem;
@@ -490,21 +459,10 @@
 	}
 	/* --- Responsive Styles --- */
 	@media (max-width: 768px) {
-		.controls-container {
-			flex-direction: column;
-			gap: 1rem;
-			align-items: stretch;
-		}
-		.controls-container input {
-			width: 100%;
-		}
 		.filter-panel {
 			flex-direction: column;
 			align-items: stretch;
 			gap: 1.5rem;
-		}
-		.add-new-link {
-			text-align: center;
 		}
 	}
 </style>

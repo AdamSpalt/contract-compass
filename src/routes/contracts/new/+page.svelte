@@ -1,22 +1,65 @@
 <script lang="ts">
-	import type { ActionData } from './$types';
+	import { enhance } from '$app/forms';
+	import { onMount } from 'svelte';
 	import { addYears, format } from 'date-fns';
+	import type { ActionData } from './$types';
+
 	export let form: ActionData;
+
+	// Form state variables
+	let contract_name = '';
+	let vendor_name = '';
+	let start_date = '';
+	let end_date = '';
+	let contract_value: number | null = null;
+	let notice_period_days: number | null = 30;
+	let contract_number = '';
+	let vendor_link = '';
+	let payment_terms = 'one_time';
+	let contract_file: FileList;
 
 	let endDateType: 'specific' | 'monthly' | 'yearly' = 'specific';
 	let contractType: 'Insurance' | 'Subscription' | 'Other' = 'Insurance';
 	let contractSubtype: string = '';
+
+	onMount(() => {
+		const prefillDataJSON = sessionStorage.getItem('prefillContractData');
+
+		if (prefillDataJSON) {
+			try {
+				const data = JSON.parse(prefillDataJSON);
+
+				// Assign the pre-filled data to the form variables, handling potentially missing fields
+				contract_name = data.contract_name || '';
+				vendor_name = data.vendor_name || '';
+				contract_number = data.contract_number || '';
+				start_date = data.start_date || '';
+				end_date = data.end_date || '';
+				contract_value = data.contract_value || null;
+				notice_period_days = data.notice_period_days || 30;
+				contractType = data.contract_type || 'Other';
+
+				// If the AI provides a renewal term, set the radio button accordingly
+				if (data.renewal_type === 'yearly' || data.renewal_type === 'monthly') {
+					endDateType = data.renewal_type;
+				}
+			} catch (e) {
+				console.error('Failed to parse pre-fill data:', e);
+			} finally {
+				// Clean up sessionStorage so the form is not pre-filled on subsequent manual visits
+				sessionStorage.removeItem('prefillContractData');
+			}
+		}
+	});
 
 	const subTypeMap = {
 		Insurance: ['Car insurance', 'Home insurance', 'Health insurance', 'Personal Injury']
 		// Future sub-types for other categories can be added here
 	};
 
-	let startDate: string = '';
-
 	// Reactively calculate the end date if 'yearly' is selected and a start date exists
 	$: calculatedEndDate =
-		endDateType === 'yearly' && startDate ? format(addYears(new Date(startDate), 1), 'yyyy-MM-dd') : '';
+		endDateType === 'yearly' && start_date ? format(addYears(new Date(start_date), 1), 'yyyy-MM-dd') : '';
 
 	// When the main contract type changes, reset the sub-type if it's no longer relevant.
 	$: {
@@ -30,11 +73,11 @@
 	<h1>Add New Contract</h1>
 	<a href="/" class="back-link">&larr; Back to Dashboard</a>
 
-	<form method="POST" enctype="multipart/form-data">
+	<form method="POST" use:enhance enctype="multipart/form-data">
 		<h4>General Information</h4>
 		<div class="form-group">
 			<label for="contract_name">Contract Name</label>
-			<input type="text" id="contract_name" name="contract_name" required />
+			<input type="text" id="contract_name" name="contract_name" bind:value={contract_name} required />
 		</div>
 		<div class="form-group">
 			<label for="contract_type">Contract Type</label>
@@ -57,11 +100,11 @@
 		{/if}
 		<div class="form-group">
 			<label for="vendor_name">Vendor Name</label>
-			<input type="text" id="vendor_name" name="vendor_name" />
+			<input type="text" id="vendor_name" name="vendor_name" bind:value={vendor_name} />
 		</div>
 		<div class="form-group">
 			<label for="contract_number">Contract Number</label>
-			<input type="text" id="contract_number" name="contract_number" />
+			<input type="text" id="contract_number" name="contract_number" bind:value={contract_number} />
 		</div>
 
 		<hr />
@@ -69,7 +112,13 @@
 		<h4>Vendor Contact</h4>
 		<div class="form-group">
 			<label for="vendor_link">Vendor Website Link (Optional)</label>
-			<input type="url" id="vendor_link" name="vendor_link" placeholder="e.g., https://www.example.com" />
+			<input
+				type="url"
+				id="vendor_link"
+				name="vendor_link"
+				placeholder="e.g., https://www.example.com"
+				bind:value={vendor_link}
+			/>
 		</div>
 
 		<hr />
@@ -77,7 +126,7 @@
 		<h4>Financial Details</h4>
 		<div class="form-group">
 			<label for="contract_value">Contract Value ($)</label>
-			<input type="number" step="0.01" id="contract_value" name="contract_value" placeholder="e.g. 1500" />
+			<input type="number" step="0.01" id="contract_value" name="contract_value" placeholder="e.g. 1500" bind:value={contract_value} />
 		</div>
 
 		<div class="form-group">
@@ -91,7 +140,7 @@
 
 		<div class="form-group">
 			<label for="notice_period_days">Notice Period (days)</label>
-			<input type="number" id="notice_period_days" name="notice_period_days" placeholder="e.g. 30" />
+			<input type="number" id="notice_period_days" name="notice_period_days" placeholder="e.g. 30" bind:value={notice_period_days} />
 		</div>
 
 		<hr />
@@ -99,7 +148,7 @@
 		<h4>Dates & Renewal</h4>
 		<div class="form-group">
 			<label for="start_date">Start Date</label>
-			<input type="date" id="start_date" name="start_date" bind:value={startDate} />
+			<input type="date" id="start_date" name="start_date" bind:value={start_date} />
 		</div>
 
 		<div class="form-group">
@@ -114,7 +163,7 @@
 		{#if endDateType === 'specific'}
 			<div class="form-group">
 				<label for="end_date">End Date</label>
-				<input type="date" id="end_date" name="end_date" />
+				<input type="date" id="end_date" name="end_date" bind:value={end_date} />
 			</div>
 		{/if}
 
@@ -128,7 +177,7 @@
 					value={calculatedEndDate}
 					readonly
 					class="readonly-input"
-					required={!!startDate}
+					required={!!start_date}
 				/>
 			</div>
 		{/if}
@@ -137,7 +186,7 @@
 
 		<div class="form-group">
 			<label for="contract_file">Contract File (Optional)</label>
-			<input type="file" id="contract_file" name="contract_file" />
+			<input type="file" id="contract_file" name="contract_file" bind:files={contract_file} />
 		</div>
 
 		<button type="submit">Add Contract</button>
