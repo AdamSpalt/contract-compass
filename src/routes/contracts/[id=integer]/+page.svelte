@@ -2,7 +2,7 @@
 	import { format, differenceInDays, isPast, subDays } from 'date-fns';
 	export let data;
 	const { contract, supabaseUrl } = data;
-	let status: { text: string; className: string } = { text: 'Active', className: 'status-active' };
+	let status: { text: string; className: string } = { text: 'Active', className: 'badge-success' };
 	let terminationDeadline: Date | null = null;
 
 	if (contract.end_date) {
@@ -23,7 +23,7 @@
 				status = { text: 'Expiring Soon', className: 'badge-warning' };
 			}
 		} else if (contract.renewal_type) {
-			status = { text: 'Auto-Renews', className: 'badge-secondary' };
+			status = { text: 'Auto-Renew', className: 'badge-secondary' };
 		}
 	}
 

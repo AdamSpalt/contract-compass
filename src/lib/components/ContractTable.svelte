@@ -29,6 +29,8 @@
 	import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 	export let contracts: Contract[];
 	export let showSubtypeColumn: boolean = true;
+	export let actionButtonText: string = 'More'; // New prop for the action button text
+	export let useActionIcon: boolean = false; // New prop to use an icon instead of text
 	export let showViewFileButton: boolean = true; // New prop to control the button's visibility
 
 	type SortableColumn =
@@ -47,7 +49,7 @@
 		Active: 'badge-success',
 		'Expiring Soon': 'badge-warning',
 		Expired: 'badge-danger',
-		'Auto-Renew': 'badge-primary',
+		'Auto-Renew': 'badge-secondary',
 		'Renewing Soon': 'badge-warning'
 	};
 
@@ -150,11 +152,11 @@
 				Value
 				{#if sortColumn === 'contract_value'}<span>{sortDirection === 'asc' ? '▲' : '▼'}</span>{/if}
 			</th>
-			<th on:click={() => handleSort('status')} class="sortable" class:active-sort={sortColumn === 'status'}>
+			<th on:click={() => handleSort('status')} class="sortable status-column" class:active-sort={sortColumn === 'status'}>
 				Status
 				{#if sortColumn === 'status'}<span>{sortDirection === 'asc' ? '▲' : '▼'}</span>{/if}
 			</th>
-			<th>Actions</th>
+			<th class="status-column">Details</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -205,7 +207,7 @@
 						N/A
 					{/if}
 				</td>
-				<td class="status-cell">
+				<td class="status-cell status-column">
 					<!-- The status badge now uses the pre-calculated status from the parent -->
 					<span class="badge {statusClassMap[contract.status ?? 'Active'] ?? 'badge-success'}">{contract.status ?? 'Active'}</span>
 				</td>
@@ -213,14 +215,87 @@
 					<div class="actions-wrapper">
 						<!-- Action buttons to view the contract file or see more details. -->
 						{#if showViewFileButton && contract.file_path}
-							<a href="{PUBLIC_SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{contract.file_path}" target="_blank" rel="noopener noreferrer" class="file-link"
+							<a href="{PUBLIC_SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{contract.file_path}" target="_blank" rel="noopener noreferrer" class="button button-small button-secondary file-link"
 								>View File</a
 							>
 						{/if}
-						<a href="/contracts/{contract.id}" class="details-link">More</a>
+						<a href="/contracts/{contract.id}" class="button button-small button-primary details-link" class:button-icon={useActionIcon} title={actionButtonText}>
+							{#if useActionIcon}
+								<!-- Gear Icon SVG -->
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: middle;">
+									<path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311a1.464 1.464 0 0 1-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.169.311c-.698 1.283.705 2.686 1.987 1.987l.31-.17a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413-1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.169-.311c.698-1.283-.705-2.686-1.987-1.987l-.31.17a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.858 2.929 2.929 0 0 1 0 5.858z"/>
+								</svg>
+							{:else}
+								{actionButtonText}
+							{/if}
+						</a>
 					</div>
 				</td>
 			</tr>
 		{/each}
 	</tbody>
 </table>
+
+<style>
+	/* Center align the status column header and cells */
+	.status-column {
+		text-align: center;
+	}
+
+	.actions-wrapper {
+		display: flex;
+		gap: 0.5rem; /* Adds space between buttons */
+		justify-content: flex-start;
+	}
+
+	/* General button styling for action links */
+	.button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.4em 0.8em;
+		border-radius: var(--border-radius);
+		font-weight: 500;
+		cursor: pointer;
+		text-decoration: none;
+		transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+		white-space: nowrap; /* Prevent text wrapping */
+	}
+
+	.button-small {
+		padding: 0.3em 0.6em;
+		font-size: 0.8rem; /* A slightly smaller, more controlled size for table context */
+	}
+
+	/* Style for buttons that only contain an icon - overrides the padding from .button-small */
+	.button-icon {
+		padding: 0.3em 0.5em;
+	}
+
+	.button-primary {
+		background-color: #0d6efd; /* A new, brighter blue */
+		color: white;
+		border: 1px solid #0d6efd;
+	}
+
+	.button-primary:hover {
+		background-color: #0b5ed7; /* A darker shade for hover */
+		border-color: #0b5ed7;
+	}
+
+	.button-secondary {
+		background-color: var(--color-background-light);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+	}
+
+	.button-secondary:hover {
+		background-color: var(--color-background-lighter);
+		border-color: var(--color-border-dark);
+	}
+
+	/* Align badges with buttons */
+	:global(.badge) {
+		vertical-align: middle; /* Better vertical alignment with buttons */
+	}
+</style>

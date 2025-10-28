@@ -286,7 +286,13 @@
 				<h2>Insurance</h2>
 				{#if hasAnyInsuranceContracts}
 					{#if insuranceContracts.length > 0}
-						<ContractTable contracts={insuranceContracts} showSubtypeColumn={true} showViewFileButton={false} />
+						<ContractTable
+							contracts={insuranceContracts}
+							showSubtypeColumn={true}
+							showViewFileButton={false}
+							actionButtonText="Details"
+							useActionIcon={true}
+						/>
 					{:else}
 						<p class="empty-section-placeholder">No Insurance contracts match the current filters.</p>
 					{/if}
@@ -301,7 +307,13 @@
 				<h2>Subscriptions</h2>
 				{#if hasAnySubscriptionContracts}
 					{#if subscriptionContracts.length > 0}
-						<ContractTable contracts={subscriptionContracts} showSubtypeColumn={false} showViewFileButton={false} />
+						<ContractTable
+							contracts={subscriptionContracts}
+							showSubtypeColumn={false}
+							showViewFileButton={false}
+							actionButtonText="Details"
+							useActionIcon={true}
+						/>
 					{:else}
 						<p class="empty-section-placeholder">No Subscription contracts match the current filters.</p>
 					{/if}
@@ -316,7 +328,13 @@
 				<h2>Other</h2>
 				{#if hasAnyOtherContracts}
 					{#if otherContracts.length > 0}
-						<ContractTable contracts={otherContracts} showSubtypeColumn={false} showViewFileButton={false} />
+						<ContractTable
+							contracts={otherContracts}
+							showSubtypeColumn={false}
+							showViewFileButton={false}
+							actionButtonText="Details"
+							useActionIcon={true}
+						/>
 					{:else}
 						<p class="empty-section-placeholder">No "Other" contracts match the current filters.</p>
 					{/if}
@@ -335,7 +353,6 @@
 	h2 {
 		margin-bottom: 1rem;
 		padding-bottom: 0.5rem;
-		border-bottom: 1px solid var(--color-border);
 		font-size: 1.5rem;
 		font-weight: 600;
 	}
