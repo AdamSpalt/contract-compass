@@ -1,17 +1,18 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
-import {
+import { env } from '$env/dynamic/private';
+/* import {
 	GOOGLE_CREDENTIALS_JSON,
 	GOOGLE_LOCATION,
 	GOOGLE_PROCESSOR_ID,
 	GOOGLE_PROJECT_ID
-} from '$env/static/private';
+} from '$env/static/private'; */
 
 // Initialize the Google Document AI client
 const docAIClient = new DocumentProcessorServiceClient({
-	apiEndpoint: `${GOOGLE_LOCATION}-documentai.googleapis.com`,
-	credentials: JSON.parse(GOOGLE_CREDENTIALS_JSON)
+	apiEndpoint: `${env.GOOGLE_LOCATION}-documentai.googleapis.com`,
+	credentials: JSON.parse(env.GOOGLE_CREDENTIALS_JSON)
 });
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -27,7 +28,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// --- Google Document AI Processing ---
 		console.log('[DEBUG] Preparing to call Google Document AI...');
-		const processorName = `projects/${GOOGLE_PROJECT_ID}/locations/${GOOGLE_LOCATION}/processors/${GOOGLE_PROCESSOR_ID}`;
+		const processorName = `projects/${env.GOOGLE_PROJECT_ID}/locations/${env.GOOGLE_LOCATION}/processors/${env.GOOGLE_PROCESSOR_ID}`;
 		console.log(`[DEBUG] Using processor: ${processorName}`);
 
 		const [result] = await docAIClient.processDocument({

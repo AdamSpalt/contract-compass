@@ -1,5 +1,6 @@
 <script>
-	import '../app.css';
+	// By importing the stylesheet here, it gets applied to every page.
+	import '../app.css'; 
 	import { page } from '$app/stores';
 </script>
 

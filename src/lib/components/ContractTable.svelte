@@ -44,11 +44,11 @@
 
 	// A map to get the right CSS class for each status text
 	const statusClassMap: Record<string, string> = {
-		Active: 'status-active',
-		'Expiring Soon': 'status-expiring',
-		Expired: 'status-expired',
-		'Auto-Renew': 'status-renews',
-		'Renewing Soon': 'status-renewing-soon'
+		Active: 'badge-success',
+		'Expiring Soon': 'badge-warning',
+		Expired: 'badge-danger',
+		'Auto-Renew': 'badge-primary',
+		'Renewing Soon': 'badge-warning'
 	};
 
 	// These variables keep track of the current sorting state.
@@ -115,7 +115,7 @@
 
 <!-- SECTION 3: HTML STRUCTURE & DISPLAY -->
 <!-- This section defines the visual layout of the table. -->
-<table class:no-subtype-column={!showSubtypeColumn}>
+<table class="contract-table" class:no-subtype-column={!showSubtypeColumn}>
 	<thead>
 		<!-- Table Headers -->
 		<!-- Each `th` (table header) is clickable to trigger the sorting logic. -->
@@ -205,9 +205,9 @@
 						N/A
 					{/if}
 				</td>
-				<td>
+				<td class="status-cell">
 					<!-- The status badge now uses the pre-calculated status from the parent -->
-					<span class="status-badge {statusClassMap[contract.status ?? 'Active'] ?? 'status-active'}">{contract.status ?? 'Active'}</span>
+					<span class="badge {statusClassMap[contract.status ?? 'Active'] ?? 'badge-success'}">{contract.status ?? 'Active'}</span>
 				</td>
 				<td>
 					<div class="actions-wrapper">
@@ -224,140 +224,3 @@
 		{/each}
 	</tbody>
 </table>
-
-<!-- SECTION 4: STYLING -->
-<!-- This section contains all the CSS rules to make the table look good. -->
-<style>
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		table-layout: fixed; /* This is the key to consistent column widths across tables */
-	}
-	th,
-	td {
-		padding: 0.75rem;
-		text-align: left;
-		border-bottom: 1px solid var(--color-border);
-		vertical-align: middle;
-	}
-
-	tbody tr:hover {
-		background-color: var(--color-bg); /* Light grey for hover effect */
-		transition: background-color 0.2s ease-in-out;
-	}
-
-	/* Define explicit widths for each column to ensure alignment */
-	/* Default widths when Sub-Type column is visible */
-	:global(table:not(.no-subtype-column)) th:nth-child(1) { width: 20%; } /* Contract Name */
-	:global(table:not(.no-subtype-column)) th:nth-child(2) { width: 8%; } /* Vendor */
-	:global(table:not(.no-subtype-column)) th:nth-child(3) { width: 15%; } /* Sub-Type */
-	:global(table:not(.no-subtype-column)) th:nth-child(4) { width: 11%; } /* Start Date */
-	:global(table:not(.no-subtype-column)) th:nth-child(5) { width: 11%; } /* End Date */
-	:global(table:not(.no-subtype-column)) th:nth-child(6) { width: 10%; } /* Renewal */
-	:global(table:not(.no-subtype-column)) th:nth-child(7) { width: 9%; }  /* Value */
-	:global(table:not(.no-subtype-column)) th:nth-child(8) { width: 8%; }  /* Status */
-	:global(table:not(.no-subtype-column)) th:nth-child(9) { width: 7%; }  /* Actions */
-
-	/* Adjusted widths when Sub-Type column is hidden */
-	:global(table.no-subtype-column) th:nth-child(1) { width: 20%; } /* Contract Name */
-	:global(table.no-subtype-column) th:nth-child(2) { width: 25%; } /* Vendor */
-	:global(table.no-subtype-column) th:nth-child(3) { width: 11%; } /* Start Date */
-	:global(table.no-subtype-column) th:nth-child(4) { width: 11%; } /* End Date */
-	:global(table.no-subtype-column) th:nth-child(5) { width: 11%; } /* Renewal */
-	:global(table.no-subtype-column) th:nth-child(6) { width: 9%; } /* Value */
-	:global(table.no-subtype-column) th:nth-child(7) { width: 8%; }  /* Status */
-	:global(table.no-subtype-column) th:nth-child(8) { width: 7%; }  /* Actions */
-
-	/* Ensure date columns don't wrap, keeping them on a single line */
-	th:nth-child(3),
-	td:nth-child(3),
-	th:nth-child(4),
-	td:nth-child(4),
-	th:nth-child(5),
-	td:nth-child(5) {
-		white-space: nowrap;
-	}
-
-	.date-renewal-cell {
-		display: flex;
-		flex-direction: column;
-	}
-	.main-date {
-		font-weight: 500;
-	}
-
-	.sortable {
-		cursor: pointer;
-		user-select: none; /* Prevent text selection on click */
-		position: relative;
-	}
-
-	.sortable:hover {
-		background-color: #f0f0f0;
-	}
-
-	.sortable span {
-		font-size: 0.8em;
-		margin-left: 0.5em;
-	}
-
-	.active-sort {
-		background-color: #e9e9e9;
-	}
-
-	th {
-		background-color: var(--color-bg);
-		font-weight: 600;
-	}
-	.details-link,
-	.file-link {
-		display: inline-block;
-		padding: 0.2rem 0.4rem; /* Reduced horizontal padding */
-		border-radius: 5px;
-		font-weight: 500;
-		text-align: center;
-		font-size: 0.875rem;
-		min-width: 70px; /* Reduced min-width to match smaller padding */
-		box-sizing: border-box;
-		white-space: nowrap;
-	}
-	.details-link,
-	.file-link {
-		background-color: var(--color-primary);
-		color: white;
-		text-decoration: none;
-	}
-	.details-link {
-		background-color: var(--color-text-secondary); /* A different, darker blue */
-	}
-	.actions-wrapper {
-		display: flex;
-		gap: 0.5rem;
-		justify-content: center;
-		align-items: center;
-	}
-	.status-badge {
-		display: inline-block;
-		padding: 0.3rem 0.75rem;
-		font-size: 0.8rem;
-		font-weight: 600;
-		border-radius: 12px;
-		color: #fff;
-	}
-	.status-active {
-		background-color: var(--status-active); /* Green */
-	}
-	.status-expiring {
-		background-color: var(--status-expiring); /* Yellow */
-		color: var(--color-warning-text);
-	}
-	.status-expired {
-		background-color: var(--status-expired); /* Red */
-	}
-	.status-renews {
-		background-color: var(--status-renews); /* Teal */
-	}
-	.status-renewing-soon {
-		background-color: var(--status-renewing-soon); /* Purple */
-	}
-</style>

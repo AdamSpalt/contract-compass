@@ -3,7 +3,7 @@
 	export let data;
 	const { contract, supabaseUrl } = data;
 	let status: { text: string; className: string } = { text: 'Active', className: 'status-active' };
-	let terminationDeadline: Date | null = null; // Must Cancel By date
+	let terminationDeadline: Date | null = null;
 
 	if (contract.end_date) {
 		const endDate = new Date(contract.end_date + 'T00:00:00');
@@ -11,21 +11,19 @@
 
 		// Calculate "Must Cancel By" date only for yearly renewing contracts
 		if (contract.renewal_type === 'yearly' && contract.notice_period_days) {
-			terminationDeadline = subDays(endDate, contract.notice_period_days);
+			terminationDeadline = subDays(endDate, contract.notice_period_days); // Must Cancel By date
 		}
 
 		if (isPast(endDate)) {
-			status = { text: 'Expired', className: 'status-expired' };
+			status = { text: 'Expired', className: 'badge-danger' };
 		} else if (daysUntilExpiry <= (contract.notice_period_days ?? 30)) {
 			if (contract.renewal_type === 'yearly') {
-				status = { text: 'Renewing Soon', className: 'status-renewing-soon' };
+				status = { text: 'Renewing Soon', className: 'badge-warning' };
 			} else {
-				status = { text: 'Expiring Soon', className: 'status-expiring' };
+				status = { text: 'Expiring Soon', className: 'badge-warning' };
 			}
 		} else if (contract.renewal_type) {
-			status = { text: 'Auto-Renews', className: 'status-renews' };
-		} else {
-			// It's just a normal active contract
+			status = { text: 'Auto-Renews', className: 'badge-secondary' };
 		}
 	}
 
@@ -37,16 +35,16 @@
 </script>
 
 <main>
-	<div class="back-links-container">
-		<a href="/" class="back-link">&larr; Back to Dashboard</a>
-		<a href="/analysis" class="back-link">&larr; Back to Insights</a>
-	</div>
-	<h1>Contract Details</h1>
+	<div class="new-contract-page">
+		<div class="back-links-container">
+			<a href="/" class="back-link">&larr; Back to Dashboard</a>
+			<a href="/analysis" class="back-link">&larr; Back to Insights</a>
+		</div>
+		<h1>Contract Details</h1>
 
-	<div class="card">
 		<div class="card-header">
 			<h2>{contract.contract_name}</h2>
-			<span class="status-badge {status.className}">{status.text}</span>
+			<span class="badge {status.className}">{status.text}</span>
 		</div>
 		<p><strong>Vendor:</strong> {contract.vendor_name ?? 'N/A'}</p>
 		<p><strong>Contract Type:</strong> {contract.contract_type ?? 'N/A'}</p>
@@ -57,7 +55,9 @@
 		{#if contract.vendor_link}
 			<p>
 				<strong>Vendor link:</strong>
-				<a href={contract.vendor_link} target="_blank" rel="noopener noreferrer">{formatUrlForDisplay(contract.vendor_link)}</a>
+				<a href={contract.vendor_link} target="_blank" rel="noopener noreferrer"
+					>{formatUrlForDisplay(contract.vendor_link)}</a
+				>
 			</p>
 		{/if}
 
@@ -109,10 +109,10 @@
 					href={`${supabaseUrl}/storage/v1/object/public/contract-files/${contract.file_path}`}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="action-button view-button">View Contract File</a
+					class="button button-primary">View Contract File</a
 				>
 			{/if}
-			<a href="/contracts/{contract.id}/edit" class="action-button edit-button">Edit Contract</a>
+			<a href="/contracts/{contract.id}/edit" class="button button-warning">Edit Contract</a>
 			<form
 				method="POST"
 				action="?/delete"
@@ -122,64 +122,19 @@
 					}
 				}}
 			>
-				<button type="submit" class="action-button delete-button">Delete</button>
+				<button type="submit" class="button button-danger">Delete</button>
 			</form>
 		</div>
 	</div>
 </main>
 
 <style>
-	main {
-		max-width: 700px;
-		margin: 2rem auto;
-		padding: 1.5rem;
-		font-family: sans-serif;
-	}
-	.back-links-container {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		margin-bottom: 1.5rem;
-	}
-	.back-link {
-		align-self: flex-start;
-		color: var(--color-text-secondary);
-		text-decoration: none;
-	}
-	.card {
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--border-radius);
-		padding: 2rem;
-		box-shadow: var(--box-shadow);
-	}
 	.card-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
 		gap: 1rem;
 		margin-bottom: 1.5rem;
-	}
-	h4 {
-		margin-bottom: 0.5rem;
-	}
-	h1 {
-		margin-bottom: 1rem;
-	}
-	h2 {
-		margin-top: 0;
-		margin-bottom: 1.5rem;
-		font-size: 1.8rem;
-		margin-bottom: 0; /* Reset margin as it's now in a flex container */
-	}
-	p {
-		margin: 0.75rem 0;
-		line-height: 1.6;
-	}
-	hr {
-		border: none;
-		border-top: 1px solid var(--color-border);
-		margin: 1.5rem 0;
 	}
 	.key-dates {
 		display: grid;
@@ -191,55 +146,9 @@
 		flex-wrap: wrap;
 		gap: 1rem;
 		margin-top: 1.5rem;
-		align-items: center;
+		align-items: stretch; /* Make all buttons the same height */
 	}
-	.action-button {
-		display: inline-block;
-		padding: 0.6rem 1.2rem;
-		color: white;
-		text-decoration: none;
-		border-radius: 5px;
-		text-align: center;
-		font-weight: 500;
-		border: none;
-		cursor: pointer;
-		font-family: inherit;
-		font-size: 0.9rem;
-	}
-	.view-button {
-		background-color: var(--color-primary);
-	}
-	.edit-button {
-		background-color: var(--color-warning);
-		color: var(--color-warning-text);
-	}
-	.delete-button {
-		background-color: var(--color-danger);
-	}
-	.status-badge {
-		display: inline-block;
-		padding: 0.3rem 0.75rem;
-		font-size: 0.8rem;
-		font-weight: 600;
-		border-radius: 12px;
-		color: #fff;
-		white-space: nowrap;
-		margin-top: 0.25rem; /* Align better with h2 */
-	}
-	.status-active {
-		background-color: var(--status-active);
-	}
-	.status-expiring {
-		background-color: var(--status-expiring);
-		color: var(--color-warning-text);
-	}
-	.status-expired {
-		background-color: var(--status-expired);
-	}
-	.status-renews {
-		background-color: var(--status-renews);
-	}
-	.status-renewing-soon {
-		background-color: var(--status-renewing-soon);
+	.card-actions form {
+		margin: 0; /* Remove default form margin */
 	}
 </style>

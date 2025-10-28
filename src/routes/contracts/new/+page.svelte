@@ -69,12 +69,14 @@
 	}
 </script>
 
-<main>
+<main class="new-contract-page">
+	<div class="back-links-container">
+		<a href="/" class="back-link">&larr; Back to Dashboard</a>
+	</div>
 	<h1>Add New Contract</h1>
-	<a href="/" class="back-link">&larr; Back to Dashboard</a>
 
 	<form method="POST" use:enhance enctype="multipart/form-data">
-		<h4>General Information</h4>
+		<h4 class="form-section-heading">General Information</h4>
 		<div class="form-group">
 			<label for="contract_name">Contract Name</label>
 			<input type="text" id="contract_name" name="contract_name" bind:value={contract_name} required />
@@ -107,9 +109,7 @@
 			<input type="text" id="contract_number" name="contract_number" bind:value={contract_number} />
 		</div>
 
-		<hr />
-
-		<h4>Vendor Contact</h4>
+		<h4 class="form-section-heading">Vendor Contact</h4>
 		<div class="form-group">
 			<label for="vendor_link">Vendor Website Link (Optional)</label>
 			<input
@@ -121,9 +121,7 @@
 			/>
 		</div>
 
-		<hr />
-
-		<h4>Financial Details</h4>
+		<h4 class="form-section-heading">Financial Details</h4>
 		<div class="form-group">
 			<label for="contract_value">Contract Value ($)</label>
 			<input type="number" step="0.01" id="contract_value" name="contract_value" placeholder="e.g. 1500" bind:value={contract_value} />
@@ -143,9 +141,7 @@
 			<input type="number" id="notice_period_days" name="notice_period_days" placeholder="e.g. 30" bind:value={notice_period_days} />
 		</div>
 
-		<hr />
-
-		<h4>Dates & Renewal</h4>
+		<h4 class="form-section-heading">Dates & Renewal</h4>
 		<div class="form-group">
 			<label for="start_date">Start Date</label>
 			<input type="date" id="start_date" name="start_date" bind:value={start_date} />
@@ -189,7 +185,7 @@
 			<input type="file" id="contract_file" name="contract_file" bind:files={contract_file} />
 		</div>
 
-		<button type="submit">Add Contract</button>
+		<button type="submit" class="button button-primary">Add Contract</button>
 
 		{#if form?.message}
 			<p class="error">Error: {form.message}</p>
@@ -197,81 +193,3 @@
 		{/if}
 	</form>
 </main>
-
-<style>
-	main {
-		max-width: 600px;
-		margin: 2rem auto;
-		padding: 1.5rem;
-		font-family: sans-serif;
-	}
-	.back-link {
-		display: inline-block;
-		margin-bottom: 1.5rem;
-	}
-	h4 {
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-		color: #333;
-		border-bottom: 1px solid var(--color-border);
-		padding-bottom: 0.5rem;
-	}
-	hr {
-		border: none;
-		border-top: 1px solid var(--color-border);
-		margin: 1.5rem 0;
-	}
-	.form-group {
-		margin-bottom: 1rem;
-	}
-	label {
-		display: block;
-		margin-bottom: 0.25rem;
-	}
-	input,
-	select {
-		width: 100%;
-		padding: 0.5rem;
-		font-size: 1rem;
-		border: 1px solid var(--color-border);
-		border-radius: 4px;
-	}
-	.readonly-input {
-		background-color: var(--color-bg);
-		cursor: not-allowed;
-	}
-	.radio-group {
-		display: flex;
-		gap: 1.5rem;
-		align-items: center;
-		padding-top: 0.5rem;
-	}
-	.radio-group label {
-		display: flex;
-		align-items: center;
-		gap: 0.3rem;
-		margin-bottom: 0;
-		font-weight: normal;
-	}
-	button {
-		padding: 0.75rem 1.5rem;
-		background-color: var(--color-primary);
-		color: white;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 1rem;
-		transition: background-color 0.2s;
-	}
-	button:hover {
-		background-color: var(--color-primary-hover);
-	}
-	.error {
-		color: var(--color-danger);
-		margin-top: 1rem;
-	}
-	.error-details {
-		color: var(--color-text-secondary);
-		font-size: 0.9rem;
-	}
-</style>

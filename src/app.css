@@ -1,42 +1,637 @@
-/* Import Google Font - A clean, modern sans-serif font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* Define CSS Custom Properties (Variables) for the new design system */
+/* --- 1. Design System: Variables --- */
 :root {
-	/* Color Palette */
-	--color-primary: #3b82f6; /* A modern, slightly desaturated blue */
-	--color-primary-hover: #2563eb;
-	--color-accent: #10b981; /* Vibrant green for "Add New" */
-	--color-accent-hover: #059669;
-	--color-danger: #ef4444;
-	--color-danger-hover: #dc2626;
-	--color-warning: #f59e0b;
-	--color-warning-text: #1f2937;
+	/* Colors */
+	--color-primary: #007bff;
+	--color-primary-hover: #0056b3;
+	--color-accent: #28a745;
+	--color-accent-hover: #218838;
+	--color-danger-hover: #c82333;
+	--color-danger: #dc3545;
+	--color-warning: #ffc107;
+	--color-bg: #f8f9fa;
+	--color-surface: #ffffff;
+	--color-text-primary: #212529;
+	--color-text-secondary: #6c757d;
+	--color-border: #dee2e6;
 
-	/* Neutral Colors */
-	--color-bg: #f8fafc; /* Light gray background */
-	--color-surface: #ffffff; /* White for cards */
-	--color-border: #e5e7eb; /* Light gray for borders */
-	--color-text-primary: #1f2937; /* Dark gray for primary text */
-	--color-text-secondary: #6b7280; /* Lighter gray for secondary text */
-	--color-text-subtle: #9ca3af;
+	/* Typography */
+	--font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+		Arial, sans-serif;
+	--font-size-base: 16px;
+	--line-height-base: 1.5;
 
-	/* Status Colors */
-	--status-active: #22c55e;
-	--status-expiring: var(--color-warning);
-	--status-expired: var(--color-danger);
-	--status-renews: #3b82f6;
-	--status-renewing-soon: #8b5cf6;
+	/* Spacing & Sizing */
+	--spacing-unit: 1rem;
+	--border-radius: 5px;
+	--max-content-width: 1200px;
 
-	/* UI Elements */
-	--border-radius: 8px;
-	--box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	/* Effects */
+	--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	--transition-speed: 0.2s;
+}
+
+.page-container {
+	max-width: 1200px; /* This should match the max-width in your +layout.svelte's nav */
+	margin: 1rem auto;
+	padding: 1.5rem;
+	width: 100%;
+}
+
+/* --- 2. Global Resets & Base Styles --- */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
 }
 
 body {
-	font-family: 'Inter', sans-serif;
-	background-color: var(--color-bg);
+	margin: 0;
+	font-family: var(--font-family-base);
+	font-size: var(--font-size-base);
+	line-height: var(--line-height-base);
 	color: var(--color-text-primary);
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+	background-color: var(--color-bg);
+}
+
+/* --- 3. Typography --- */
+h1,
+h2,
+h3,
+h4,
+h5, h6 {
+	margin-bottom: 0.5rem;
+	font-weight: 600;
+}
+
+h1 {
+	font-size: 2.25rem;
+}
+h2 {
+	font-size: 1.75rem;
+}
+p {
+	margin-top: 0;
+	margin-bottom: 1rem;
+}
+a {
+	color: var(--color-primary);
+	text-decoration: none;
+	transition: color var(--transition-speed);
+}
+a:hover {
+	color: var(--color-primary-hover);
+	text-decoration: underline;
+}
+
+/* --- 4. Reusable Components: Buttons --- */
+.button {
+	display: inline-block;
+	padding: 0.75rem 1.5rem;
+	font-size: 0.9rem; /* Explicitly set font size for consistency */
+	font-weight: bold;
+	text-align: center;
+	vertical-align: middle;
+	cursor: pointer;
+	border: 1px solid transparent;
+	border-radius: var(--border-radius);
+	text-decoration: none;
+	white-space: nowrap;
+	font-family: inherit; /* Ensure buttons inherit the global font */
+	transition: all var(--transition-speed);
+}
+
+.button-primary {
+	color: #fff;
+	background-color: var(--color-primary);
+	border-color: var(--color-primary);
+}
+.button-primary:hover {
+	color: #fff;
+	background-color: var(--color-primary-hover);
+	border-color: var(--color-primary-hover);
+	text-decoration: none;
+}
+
+.button-accent {
+	color: #fff;
+	background-color: var(--color-accent);
+	border-color: var(--color-accent);
+}
+.button-accent:hover {
+	color: #fff;
+	background-color: var(--color-accent-hover);
+	border-color: var(--color-accent-hover);
+	text-decoration: none;
+}
+
+.button-secondary {
+	color: #fff;
+	background-color: var(--color-text-secondary);
+	border-color: var(--color-text-secondary);
+}
+.button-secondary:hover {
+	color: #fff;
+	background-color: var(--color-text-primary);
+	border-color: var(--color-text-primary);
+	text-decoration: none;
+}
+
+.button-danger {
+	color: #fff;
+	background-color: var(--color-danger);
+	border-color: var(--color-danger);
+}
+.button-danger:hover {
+	color: #fff;
+	background-color: var(--color-danger-hover);
+	border-color: var(--color-danger-hover);
+	text-decoration: none;
+}
+
+/* --- 5. Global Component & Layout Styles --- */
+
+/* Disabled State for Buttons/Links */
+.button.disabled {
+	background-color: #a9a9a9;
+	border-color: #a9a9a9;
+	color: #fff;
+	cursor: not-allowed;
+	pointer-events: none;
+	opacity: 0.7;
+}
+.button.disabled:hover {
+	background-color: #a9a9a9;
+	border-color: #a9a9a9;
+	color: #fff;
+	text-decoration: none;
+}
+
+/* Card Style */
+.card {
+	background-color: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 8px; /* Slightly larger radius for cards */
+	padding: 1.5rem;
+	box-shadow: var(--box-shadow);
+	text-align: center;
+	transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+.card.clickable:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+	cursor: pointer;
+}
+.card.active {
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Badge Style */
+.badge {
+	display: inline-block;
+	padding: 0.35em 0.65em;
+	font-size: 0.875rem; /* Match the font size of the 'More' button */
+	font-weight: 500;
+	line-height: 1;
+	color: #fff;
+	text-align: center;
+	vertical-align: baseline;
+	border-radius: 0.25rem;
+	box-sizing: border-box; /* Ensures padding is included in the width */
+	white-space: normal; /* Allows text to wrap onto multiple lines */
+}
+.badge-success {
+	background-color: var(--color-accent);
+}
+.badge-danger {
+	background-color: var(--color-danger);
+}
+.badge-warning {
+	background-color: var(--color-warning);
+	color: var(--color-text-primary); /* Dark text for better contrast on yellow */
+}
+.badge-secondary {
+	background-color: var(--color-text-secondary);
+}
+.badge-primary {
+	background-color: var(--color-primary);
+}
+
+.button-warning {
+	color: var(--color-text-primary); /* Dark text for better contrast on yellow */
+	background-color: var(--color-warning);
+	border-color: var(--color-warning);
+}
+.button-warning:hover {
+	color: var(--color-text-primary);
+	background-color: #e0a800; /* Darker yellow */
+	border-color: #e0a800;
+	text-decoration: none;
+	box-shadow: var(--box-shadow);
+}
+
+/* Dashboard Controls */
+.controls-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 1.5rem 0;
+}
+.controls-container input {
+	width: 50%;
+	padding: 0.75rem 1rem;
+	font-size: 1rem;
+	border-radius: 5px;
+	border: 1px solid var(--color-border);
+	box-sizing: border-box;
+}
+
+.button-group {
+	display: flex;
+	gap: 1rem;
+	align-items: center;
+}
+
+/* --- 6. Responsive Overrides --- */
+@media (max-width: 768px) {
+}
+
+/* --- 7. Contract Table Styles --- */
+.contract-table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.contract-table th,
+.contract-table td {
+	padding: 0.75rem;
+	text-align: left;
+	border-bottom: 1px solid var(--color-border);
+	vertical-align: middle;
+}
+
+.contract-table tbody tr:hover {
+	background-color: var(--color-bg);
+}
+
+/* Column widths */
+.contract-table:not(.no-subtype-column) th:nth-child(1) { width: 20%; }
+.contract-table:not(.no-subtype-column) th:nth-child(2) { width: 8%; }
+.contract-table:not(.no-subtype-column) th:nth-child(3) { width: 15%; }
+.contract-table:not(.no-subtype-column) th:nth-child(4) { width: 11%; }
+.contract-table:not(.no-subtype-column) th:nth-child(5) { width: 11%; }
+.contract-table:not(.no-subtype-column) th:nth-child(6) { width: 10%; }
+.contract-table:not(.no-subtype-column) th:nth-child(7) { width: 9%; }
+.contract-table:not(.no-subtype-column) th:nth-child(8) { width: 8%; }
+.contract-table:not(.no-subtype-column) th:nth-child(9) { width: 7%; }
+
+.contract-table.no-subtype-column th:nth-child(1) { width: 20%; }
+.contract-table.no-subtype-column th:nth-child(2) { width: 25%; }
+.contract-table.no-subtype-column th:nth-child(3) { width: 11%; }
+.contract-table.no-subtype-column th:nth-child(4) { width: 11%; }
+.contract-table.no-subtype-column th:nth-child(5) { width: 11%; }
+.contract-table.no-subtype-column th:nth-child(6) { width: 9%; }
+.contract-table.no-subtype-column th:nth-child(7) { width: 8%; }
+.contract-table.no-subtype-column th:nth-child(8) { width: 7%; }
+
+.contract-table th {
+	background-color: var(--color-bg);
+	font-weight: 600;
+}
+
+.contract-table .sortable {
+	cursor: pointer;
+	user-select: none;
+	position: relative;
+}
+.contract-table .sortable:hover {
+	background-color: #f0f0f0;
+}
+.contract-table .sortable span {
+	font-size: 0.8em;
+	margin-left: 0.5em;
+}
+.contract-table .active-sort {
+	background-color: #e9e9e9;
+}
+
+.contract-table .actions-wrapper {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+	align-items: center;
+}
+
+.contract-table .status-cell {
+	text-align: center;
+}
+
+.contract-table .details-link,
+.contract-table .file-link {
+	display: inline-block;
+	padding: 0.2rem 0.4rem;
+	border-radius: 5px;
+	font-weight: 500;
+	text-align: center;
+	font-size: 0.875rem;
+	min-width: 70px;
+	box-sizing: border-box;
+	white-space: nowrap;
+	background-color: var(--color-text-secondary);
+	color: white;
+	text-decoration: none;
+}
+.contract-table .file-link {
+	background-color: var(--color-primary);
+}
+
+/* --- 8. Stat Card Styles --- */
+.card .stat-value {
+	font-size: 2.5rem;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	display: block;
+	line-height: 1.2;
+}
+.card .label-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 0.5rem;
+	flex-direction: column;
+}
+.card .main-label-line {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.5rem;
+}
+.card .sub-label {
+	font-size: 0.75rem;
+	color: var(--color-text-secondary);
+	font-style: italic;
+	margin-top: 0.1rem;
+}
+.card .stat-label {
+	font-size: 0.9rem;
+	color: var(--color-text-secondary);
+}
+.card .tooltip-container {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+.card .info-icon {
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 0.8rem;
+	color: var(--color-text-secondary);
+	cursor: help;
+	border: 1px solid var(--color-border);
+	border-radius: 50%;
+	width: 16px;
+	height: 16px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	line-height: 1;
+}
+.card .tooltip {
+	visibility: hidden;
+	width: 220px;
+	background-color: var(--color-text-primary);
+	color: var(--color-surface);
+	text-align: center;
+	border-radius: 6px;
+	padding: 8px;
+	position: absolute;
+	z-index: 1;
+	bottom: 150%;
+	left: 50%;
+	margin-left: -110px;
+	opacity: 0;
+	transition: opacity 0.3s;
+	font-size: 0.85rem;
+	font-weight: normal;
+}
+.card .tooltip-container:hover .tooltip {
+	visibility: visible;
+	opacity: 1;
+}
+
+/* --- 9. Form Styles --- */
+.form-container {
+	max-width: 700px;
+	margin: 2rem auto;
+	padding: 2rem;
+	background-color: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius);
+}
+
+.form-container .back-link {
+	display: inline-block;
+	margin-bottom: 1.5rem;
+}
+
+.form-section-heading {
+	margin-top: 2rem;
+	margin-bottom: 1rem;
+	color: var(--color-text-primary);
+	border-bottom: 1px solid var(--color-border);
+	padding-bottom: 0.5rem;
+	font-size: 1.25rem;
+}
+
+.form-divider {
+	border: none;
+	border-top: 1px solid var(--color-border);
+	margin: 2rem 0;
+}
+
+.form-container .form-group,
+.new-contract-page .form-group {
+	margin-bottom: 1.25rem;
+}
+
+.form-container .form-group label,
+.new-contract-page .form-group label {
+	display: block;
+	margin-bottom: 0.5rem;
+	font-weight: 500;
+	color: var(--color-text-secondary);
+}
+
+.form-container .form-group input[type='text'],
+.form-container .form-group input[type='number'],
+.form-container .form-group input[type='date'],
+.form-container .form-group input[type='url'],
+.form-container .form-group input[type='file'],
+.form-container .form-group select,
+.new-contract-page .form-group input,
+.new-contract-page .form-group select {
+	width: 100%;
+	padding: 0.75rem;
+	font-size: 1rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius);
+	background-color: var(--color-surface);
+	transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.form-container .form-group input:focus,
+.form-container .form-group select:focus,
+.new-contract-page .form-group input:focus,
+.new-contract-page .form-group select:focus {
+	outline: none;
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.new-contract-page .readonly-input {
+	background-color: var(--color-bg);
+	cursor: not-allowed;
+}
+
+/* --- 10. Page-Specific Styles --- */
+
+/* New Contract Page */
+.new-contract-page {
+	max-width: 700px;
+	margin: 2rem auto;
+	padding: 1.5rem;
+	background-color: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius);
+}
+
+.new-contract-page h1 {
+	margin-top: 1.5rem; /* Explicitly create space above the title */
+	margin-bottom: 0; /* Remove bottom margin to reduce space */
+}
+
+.new-contract-page form {
+	margin-top: 1.5rem; /* Add space between h1 and the form */
+}
+
+.new-contract-page hr {
+	border: none;
+	border-top: 1px solid var(--color-border);
+	margin: 2rem 0;
+}
+
+.new-contract-page .radio-group {
+	display: flex;
+	gap: 1.5rem;
+	align-items: center;
+	padding-top: 0.5rem;
+}
+
+.new-contract-page .radio-group label {
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+	margin-bottom: 0;
+	font-weight: normal;
+}
+
+.new-contract-page .error {
+	color: var(--color-danger);
+	margin-top: 1rem;
+}
+
+.new-contract-page .error-details {
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+}
+
+.new-contract-page .attached-file-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.75rem;
+}
+
+.new-contract-page .attached-file-name {
+	font-weight: 500;
+	color: var(--color-text-primary);
+}
+
+.new-contract-page .remove-file-form {
+	margin: 0;
+	line-height: 1; /* Helps with vertical alignment */
+}
+
+/* --- 11. Contract Details Page Styles --- */
+.details-page-container {
+	max-width: 700px; /* Match the edit/new contract page width */
+	margin: 2rem auto; /* Match the edit/new contract page margin */
+	padding: 1.5rem;
+}
+
+.details-page-container h1 {
+	/* This was removed, let's add it back to create space */
+	margin-bottom: 1.5rem;
+}
+
+.details-page-container .card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+}
+
+.details-page-container .card-header h2 {
+	margin-top: 0;
+	margin-bottom: 0; /* Reset margin as it's now in a flex container */
+	font-size: 1.8rem;
+}
+
+.details-page-container p {
+	margin: 0.75rem 0;
+	line-height: 1.6;
+}
+
+.details-page-container hr {
+	border: none;
+	border-top: 1px solid var(--color-border);
+	margin: 1.5rem 0;
+}
+
+.details-page-container h4 {
+	margin-bottom: 0.5rem;
+}
+
+.details-page-container .key-dates {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 1rem;
+}
+
+.details-page-container .card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin-top: 1.5rem;
+	align-items: center;
+}
+
+.details-page-container .remove-file-form {
+	margin-top: 0; /* Remove any default form margin */
+}
+
+/* --- 12. Shared Component Styles --- */
+.back-links-container {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	margin-bottom: 1.5rem; /* Add space AFTER the container to prevent margin collapse */
+}
+.back-link {
+	align-self: flex-start;
+	color: var(--color-text-secondary);
+	text-decoration: none;
 }

@@ -168,162 +168,164 @@
 </script>
 
 <main>
-	<h1>Dashboard</h1>
+	<div class="page-container">
+		<h1>Dashboard</h1>
 
-	<p>A central place to manage all your important contracts.</p>
+		<p>A central place to manage all your important contracts.</p>
 
-	<div class="stats-container">
-		<StatCard
-			value={activeContractsCount}
-			label="Active Contracts"
-			clickable={true}
-			active={statusFilter === 'active-contracts'}
-			on:click={() => (statusFilter = 'active-contracts')}
-			tooltipText="The total number of contracts that have not expired."
-		/>
-		<StatCard
-			value={actionRequiredCount}
-			label="Action Required"
-			highlightColor="#ffc107"
-			clickable={true}
-			active={statusFilter === 'action-required'}
-			on:click={() => (statusFilter = 'action-required')}
-			tooltipText="Contracts that are either expiring or renewing soon and may require attention."
-		/>
-		<StatCard
-			value={expiredContractsCount}
-			label="Expired Contracts"
-			highlightColor="#dc3545"
-			clickable={true}
-			active={statusFilter === 'Expired'}
-			on:click={() => (statusFilter = 'Expired')}
-			tooltipText="The total number of contracts that have passed their end date."
-		/>
-	</div>
+		<div class="stats-container">
+			<StatCard
+				value={activeContractsCount}
+				label="Active Contracts"
+				clickable={true}
+				active={statusFilter === 'active-contracts'}
+				on:click={() => (statusFilter = 'active-contracts')}
+				tooltipText="The total number of contracts that have not expired."
+			/>
+			<StatCard
+				value={actionRequiredCount}
+				label="Action Required"
+				highlightColor="#ffc107"
+				clickable={true}
+				active={statusFilter === 'action-required'}
+				on:click={() => (statusFilter = 'action-required')}
+				tooltipText="Contracts that are either expiring or renewing soon and may require attention."
+			/>
+			<StatCard
+				value={expiredContractsCount}
+				label="Expired Contracts"
+				highlightColor="#dc3545"
+				clickable={true}
+				active={statusFilter === 'Expired'}
+				on:click={() => (statusFilter = 'Expired')}
+				tooltipText="The total number of contracts that have passed their end date."
+			/>
+		</div>
 
-	<DashboardControls bind:searchTerm />
+		<DashboardControls bind:searchTerm />
 
-	<div class="filter-toggle-container">
-		<button class="filter-toggle-button" on:click={() => (showFilters = !showFilters)}>
-			{showFilters ? 'Hide' : 'Show'} Filters {showFilters ? '▲' : '▼'}
-		</button>
-		{#if areFiltersActive}
-			<button class="clear-filters-button" on:click={clearFilters}>Clear All Filters</button>
-		{/if}
-	</div>
+		<div class="filter-toggle-container">
+			<button class="button" on:click={() => (showFilters = !showFilters)}>
+				{showFilters ? 'Hide' : 'Show'} Filters {showFilters ? '▲' : '▼'}
+			</button>
+			{#if areFiltersActive}
+				<button class="button button-secondary" on:click={clearFilters}>Clear All Filters</button>
+			{/if}
+		</div>
 
-	{#if showFilters}
-		<div class="filter-panel-wrapper">
-			<div class="filter-panel">
-				<div class="filter-group">
-					<label for="type-filter">Contract Type</label>
-					<select id="type-filter" bind:value={typeFilter}>
-						<option value="all">All Types</option>
-						<option value="Insurance">Insurance</option>
-						<option value="Subscription">Subscription</option>
-						<option value="Other">Other</option>
-					</select>
-				</div>
-				{#if typeFilter === 'Insurance'}
+		{#if showFilters}
+			<div class="filter-panel-wrapper">
+				<div class="filter-panel">
 					<div class="filter-group">
-						<label for="subtype-filter">Insurance Sub-Type</label>
-						<select id="subtype-filter" bind:value={subtypeFilter}>
-							<option value="all">All Sub-Types</option>
-							<option value="Car insurance">Car insurance</option>
-							<option value="Home insurance">Home insurance</option>
-							<option value="Health insurance">Health insurance</option>
-							<option value="Personal Injury">Personal Injury</option>
+						<label for="type-filter">Contract Type</label>
+						<select id="type-filter" bind:value={typeFilter}>
+							<option value="all">All Types</option>
+							<option value="Insurance">Insurance</option>
+							<option value="Subscription">Subscription</option>
+							<option value="Other">Other</option>
 						</select>
 					</div>
-				{/if}
-				<div class="filter-group">
-					<label for="start-date-filter">Start Date</label>
-					<input type="date" id="start-date-filter" bind:value={startDateFilter} />
+					{#if typeFilter === 'Insurance'}
+						<div class="filter-group">
+							<label for="subtype-filter">Insurance Sub-Type</label>
+							<select id="subtype-filter" bind:value={subtypeFilter}>
+								<option value="all">All Sub-Types</option>
+								<option value="Car insurance">Car insurance</option>
+								<option value="Home insurance">Home insurance</option>
+								<option value="Health insurance">Health insurance</option>
+								<option value="Personal Injury">Personal Injury</option>
+							</select>
+						</div>
+					{/if}
+					<div class="filter-group">
+						<label for="start-date-filter">Start Date</label>
+						<input type="date" id="start-date-filter" bind:value={startDateFilter} />
+					</div>
+					<div class="filter-group">
+						<label for="end-date-filter">End Date</label>
+						<input type="date" id="end-date-filter" bind:value={endDateFilter} />
+					</div>
+					<div class="filter-group">
+						<label for="min-value-filter">Min Value</label>
+						<input type="number" id="min-value-filter" placeholder="e.g., 1000" bind:value={minValueFilter} />
+					</div>
+					<div class="filter-group">
+						<label for="max-value-filter">Max Value</label>
+						<input type="number" id="max-value-filter" placeholder="e.g., 5000" bind:value={maxValueFilter} />
+					</div>
+					<div class="filter-group">
+						<label for="status-filter">Status</label>
+						<select id="status-filter" bind:value={statusFilter}>
+							<option value="all">All Statuses</option>
+							<option value="active-contracts">All Active</option>
+							<option value="action-required">Action Required</option>
+							<option value="Active">Active</option>
+							<option value="Expiring Soon">Expiring Soon</option>
+							<option value="Expired">Expired</option>
+							<option value="Renewing Soon">Renewing Soon</option>
+							<option value="Auto-Renew">Auto-Renew</option>
+						</select>
+					</div>
+					<div class="filter-group">
+						<label for="has-file">
+							<input type="checkbox" id="has-file" bind:checked={hasFile} />
+							Has attached file
+						</label>
+					</div>
 				</div>
-				<div class="filter-group">
-					<label for="end-date-filter">End Date</label>
-					<input type="date" id="end-date-filter" bind:value={endDateFilter} />
-				</div>
-				<div class="filter-group">
-					<label for="min-value-filter">Min Value</label>
-					<input type="number" id="min-value-filter" placeholder="e.g., 1000" bind:value={minValueFilter} />
-				</div>
-				<div class="filter-group">
-					<label for="max-value-filter">Max Value</label>
-					<input type="number" id="max-value-filter" placeholder="e.g., 5000" bind:value={maxValueFilter} />
-				</div>
-				<div class="filter-group">
-					<label for="status-filter">Status</label>
-					<select id="status-filter" bind:value={statusFilter}>
-						<option value="all">All Statuses</option>
-						<option value="active-contracts">All Active</option>
-						<option value="action-required">Action Required</option>
-						<option value="Active">Active</option>
-						<option value="Expiring Soon">Expiring Soon</option>
-						<option value="Expired">Expired</option>
-						<option value="Renewing Soon">Renewing Soon</option>
-						<option value="Auto-Renew">Auto-Renew</option>
-					</select>
-				</div>
-				<div class="filter-group">
-					<label for="has-file">
-						<input type="checkbox" id="has-file" bind:checked={hasFile} />
-						Has attached file
-					</label>
+				<div class="filter-actions">
+					<button class="button button-secondary" on:click={clearFilters}>
+						Clear All Filters
+					</button>
 				</div>
 			</div>
-			<div class="filter-actions">
-				<button class="clear-filters-button" on:click={clearFilters}>
-					Clear All Filters
-				</button>
-			</div>
-		</div>
-	{/if}
+		{/if}
 
-	{#if typeFilter === 'all' || typeFilter === 'Insurance'}
-		<section>
-			<h2>Insurance</h2>
-			{#if hasAnyInsuranceContracts}
-				{#if insuranceContracts.length > 0}
-					<ContractTable contracts={insuranceContracts} showSubtypeColumn={true} showViewFileButton={false} />
+		{#if typeFilter === 'all' || typeFilter === 'Insurance'}
+			<section>
+				<h2>Insurance</h2>
+				{#if hasAnyInsuranceContracts}
+					{#if insuranceContracts.length > 0}
+						<ContractTable contracts={insuranceContracts} showSubtypeColumn={true} showViewFileButton={false} />
+					{:else}
+						<p class="empty-section-placeholder">No Insurance contracts match the current filters.</p>
+					{/if}
 				{:else}
-					<p class="empty-section-placeholder">No Insurance contracts match the current filters.</p>
+					<p class="empty-section-placeholder">No 'Insurance' contracts have been added yet.</p>
 				{/if}
-			{:else}
-				<p class="empty-section-placeholder">No 'Insurance' contracts have been added yet.</p>
-			{/if}
-		</section>
-	{/if}
+			</section>
+		{/if}
 
-	{#if typeFilter === 'all' || typeFilter === 'Subscription'}
-		<section>
-			<h2>Subscriptions</h2>
-			{#if hasAnySubscriptionContracts}
-				{#if subscriptionContracts.length > 0}
-					<ContractTable contracts={subscriptionContracts} showSubtypeColumn={false} showViewFileButton={false} />
+		{#if typeFilter === 'all' || typeFilter === 'Subscription'}
+			<section>
+				<h2>Subscriptions</h2>
+				{#if hasAnySubscriptionContracts}
+					{#if subscriptionContracts.length > 0}
+						<ContractTable contracts={subscriptionContracts} showSubtypeColumn={false} showViewFileButton={false} />
+					{:else}
+						<p class="empty-section-placeholder">No Subscription contracts match the current filters.</p>
+					{/if}
 				{:else}
-					<p class="empty-section-placeholder">No Subscription contracts match the current filters.</p>
+					<p class="empty-section-placeholder">No 'Subscription' contracts have been added yet.</p>
 				{/if}
-			{:else}
-				<p class="empty-section-placeholder">No 'Subscription' contracts have been added yet.</p>
-			{/if}
-		</section>
-	{/if}
+			</section>
+		{/if}
 
-	{#if typeFilter === 'all' || typeFilter === 'Other'}
-		<section>
-			<h2>Other</h2>
-			{#if hasAnyOtherContracts}
-				{#if otherContracts.length > 0}
-					<ContractTable contracts={otherContracts} showSubtypeColumn={false} showViewFileButton={false} />
+		{#if typeFilter === 'all' || typeFilter === 'Other'}
+			<section>
+				<h2>Other</h2>
+				{#if hasAnyOtherContracts}
+					{#if otherContracts.length > 0}
+						<ContractTable contracts={otherContracts} showSubtypeColumn={false} showViewFileButton={false} />
+					{:else}
+						<p class="empty-section-placeholder">No "Other" contracts match the current filters.</p>
+					{/if}
 				{:else}
-					<p class="empty-section-placeholder">No "Other" contracts match the current filters.</p>
+					<p class="empty-section-placeholder">No 'Other' contracts have been added yet.</p>
 				{/if}
-			{:else}
-				<p class="empty-section-placeholder">No 'Other' contracts have been added yet.</p>
-			{/if}
-		</section>
-	{/if}
+			</section>
+		{/if}
+	</div>
 </main>
 
 <style>
@@ -336,14 +338,6 @@
 		border-bottom: 1px solid var(--color-border);
 		font-size: 1.5rem;
 		font-weight: 600;
-	}
-	main {
-		max-width: 1100px;
-		margin: 0 auto;
-		max-width: 1200px;
-		margin: 1rem auto;
-		padding: 1.5rem;
-		font-family: sans-serif;
 	}
 	.stats-container {
 		display: grid;
@@ -360,20 +354,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-	}
-	.filter-toggle-button {
-		background-color: transparent;
-		border: 1px solid var(--color-border);
-		padding: 0.5rem 1rem;
-		border-radius: 5px;
-		cursor: pointer;
-		font-weight: 500;
-		font-size: 0.9rem;
-		color: var(--color-text-primary);
-		transition: background-color 0.2s;
-	}
-	.filter-toggle-button:hover {
-		background-color: var(--color-border);
 	}
 	.filter-panel-wrapper {
 		background-color: var(--color-surface);
@@ -432,20 +412,6 @@
 	.filter-actions {
 		padding: 0 1.5rem 1rem;
 		text-align: right;
-	}
-	.clear-filters-button {
-		background-color: var(--color-text-secondary);
-		color: white;
-		border: none;
-		padding: 0.5rem 1rem;
-		border-radius: 5px;
-		cursor: pointer;
-		font-weight: 500;
-		font-size: 0.9rem;
-		transition: background-color 0.2s;
-	}
-	.clear-filters-button:hover {
-		background-color: var(--color-text-primary);
 	}
 
 	.empty-section-placeholder {
