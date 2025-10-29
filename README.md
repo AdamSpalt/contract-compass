@@ -32,7 +32,6 @@ This project is built with a modern technology stack, making it fast, reliable, 
 - **Automated Email Reminders**: Automatically sends email notifications 30, 14, and 7 days before a contract's end date to ensure timely renewals.
 - **AI-Powered PDF Import**: Automatically extract data from PDF contracts to pre-fill new contract forms using Google Document AI.
 - **Scalable Backend**: Built on Supabase for robust data management and authentication.
-- **Modern Web Experience**: Fast and responsive user interface built with SvelteKit.
 
 ## AI-Powered PDF Import
 
