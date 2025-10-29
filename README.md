@@ -152,13 +152,6 @@ PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 
 ### AI Import Setup
 
-To start the development server, run:
-To enable this feature, you must configure a **Form Parser** in Google Cloud Document AI and add the following environment variables to your `.env` file:
-
-```bash
-npm run dev
-```
-```env
 # Google Cloud Project ID
 GOOGLE_PROJECT_ID="your-gcp-project-id"
 
@@ -174,10 +167,4 @@ To create a production version of your app:
 
 ```bash
 npm run build
-# The JSON credentials for a GCP service account with Document AI permissions.
-# This entire JSON key should be pasted as a single-line string.
-GOOGLE_CREDENTIALS_JSON='{"type": "service_account", "project_id": "...", ...}'
-```
-You can preview the production build with `npm run preview`.
-
 
