@@ -118,10 +118,7 @@ Follow these instructions to get a local copy of the project up and running.
 *   Node.js (v18 or higher recommended)
 *   npm (or pnpm/yarn)
 *   A Supabase account (for database and authentication).
-*   A Google Cloud Platform account with the Document AI API enabled (for PDF import).
-*   Node.js (v18 or later)
-*   npm
-*   A Google Cloud Platform account with the Document AI API enabled.
+*   A Google Cloud Platform account with the Document AI API enabled 
 
 ### Installation
 
@@ -141,16 +138,12 @@ Follow these instructions to get a local copy of the project up and running.
 
 The project requires environment variables for both Supabase and Google Cloud.
 
-#### Supabase (Required for core functionality)
-#### Frontend Application (.env)
-
 ```env
 PUBLIC_SUPABASE_URL="your-supabase-project-url"
 PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 ```
 
-```AI Import Setup
-```### AI Import SetupS
+```AI Import SetupS
 GOOGLE_PROJECT_ID="your-gcp-project-id"
 GOOGLE_LOCATION="eu"
 GOOGLE_PROCESSOR_ID="your-processor-id"
@@ -158,4 +151,3 @@ GOOGLE_PROCESSOR_ID="your-processor-id"
 To create a production version of your app:
 ```bash
 npm run build
-
