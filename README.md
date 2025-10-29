@@ -135,7 +135,7 @@ Follow these instructions to get a local copy of the project up and running.
     ```
 
 ### Environment Variables
-3.  Set up your environment variables by creating a `.env` file in the root of the project. See the **AI Import Setup** section below for details.
+3.  Set up your environment variables by creating a `.env` file in the root of the project.
 
 The project requires two sets of environment variables.
 4.  Run the development server:
@@ -144,21 +144,12 @@ The project requires two sets of environment variables.
     ```
 
 #### Frontend Application (.env)
----
-
-Create a `.env` file in the root of your project for the SvelteKit application:
-## AI-Powered PDF Import
 
 ```env
 PUBLIC_SUPABASE_URL="your-supabase-project-url"
 PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 ```
-This feature allows users to upload a contract in PDF format. The system uses Google Cloud Document AI to parse the document, extract key-value pairs, and automatically pre-fill the "Add New Contract" form, saving significant manual entry time.
 
-You can find these keys in your Supabase project's API settings.
-**NOTE:** This functionality is in a preview stage. Data extraction may not be perfect for all document layouts.
-
-### Running the Application
 ### AI Import Setup
 
 To start the development server, run:
@@ -187,12 +178,6 @@ npm run build
 # This entire JSON key should be pasted as a single-line string.
 GOOGLE_CREDENTIALS_JSON='{"type": "service_account", "project_id": "...", ...}'
 ```
-
 You can preview the production build with `npm run preview`.
-**How to get `GOOGLE_CREDENTIALS_JSON`:**
-1.  In the Google Cloud Console, go to "IAM & Admin" > "Service Accounts".
-2.  Create a new service account.
-3.  Grant it the "Document AI API User" role.
-4.  Create a JSON key for the service account and download it.
-5.  Copy the entire content of the downloaded JSON file and paste it as the value for `GOOGLE_CREDENTIALS_JSON`.
+
 
