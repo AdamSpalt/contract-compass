@@ -4,8 +4,6 @@ Welcome to Contract Compass, a web application designed to help users manage and
 
 This project is built with a modern technology stack, making it fast, reliable, and easy to maintain.
 
-![Contract Compass Dashboard](./.github/images/dashboard-screenshot.png)
-
 ## Table of Contents
 
 - [Key Features](#key-features)
@@ -32,7 +30,6 @@ This project is built with a modern technology stack, making it fast, reliable, 
 - **Automated Email Reminders**: Automatically sends email notifications 30, 14, and 7 days before a contract's end date to ensure timely renewals.
 - **AI-Powered PDF Import**: Automatically extract data from PDF contracts to pre-fill new contract forms using Google Document AI.
 - **Scalable Backend**: Built on Supabase for robust data management and authentication.
-- **Modern Web Experience**: Fast and responsive user interface built with SvelteKit.
 
 ## AI-Powered PDF Import
 
@@ -118,97 +115,40 @@ Follow these instructions to get a local copy of the project up and running.
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
-- npm (or pnpm/yarn)
-*   Node.js (v18 or later)
-*   npm
-*   A Google Cloud Platform account with the Document AI API enabled.
+*   Node.js (v18 or higher recommended)
+*   npm (or pnpm/yarn)
+*   A Supabase account (for database and authentication).
+*   A Google Cloud Platform account with the Document AI API enabled (for PDF import).
 
 ### Installation
 
 1.  Clone the repository:
     ```bash
     git clone <your-repository-url>
-    git clone <repository-url>
     cd contract-compass
     ```
-2.  Install the dependencies:
-
 2.  Install dependencies:
     ```bash
     npm install
     ```
+3.  Create a `.env` file in the root of your project and add the variables as described below.
 
 ### Environment Variables
-3.  Set up your environment variables by creating a `.env` file in the root of the project. See the **AI Import Setup** section below for details.
 
-The project requires two sets of environment variables.
-4.  Run the development server:
-    ```bash
-    npm run dev
-    ```
+The project requires environment variables for both Supabase and Google Cloud.
 
-#### Frontend Application (.env)
----
-
-Create a `.env` file in the root of your project for the SvelteKit application:
-## AI-Powered PDF Import
+#### Supabase (Required for core functionality)
 
 ```env
 PUBLIC_SUPABASE_URL="your-supabase-project-url"
 PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 ```
-This feature allows users to upload a contract in PDF format. The system uses Google Cloud Document AI to parse the document, extract key-value pairs, and automatically pre-fill the "Add New Contract" form, saving significant manual entry time.
 
-You can find these keys in your Supabase project's API settings.
-**NOTE:** This functionality is in a preview stage. Data extraction may not be perfect for all document layouts.
-
-### Running the Application
-### AI Import Setup
-
-To start the development server, run:
-To enable this feature, you must configure a **Form Parser** in Google Cloud Document AI and add the following environment variables to your `.env` file:
-
-```bash
-npm run dev
-```
-```env
-# Google Cloud Project ID
+```AI Import Setup
 GOOGLE_PROJECT_ID="your-gcp-project-id"
-
-The application will be available at `http://localhost:5173`.
-# The location of your Document AI processor (e.g., "eu" or "us")
 GOOGLE_LOCATION="eu"
-
-## Building for Production
-# The specific ID of your Document AI Form Parser processor
 GOOGLE_PROCESSOR_ID="your-processor-id"
-
+```
 To create a production version of your app:
-
 ```bash
 npm run build
-# The JSON credentials for a GCP service account with Document AI permissions.
-# This entire JSON key should be pasted as a single-line string.
-GOOGLE_CREDENTIALS_JSON='{"type": "service_account", "project_id": "...", ...}'
-```
-
-You can preview the production build with `npm run preview`.
-**How to get `GOOGLE_CREDENTIALS_JSON`:**
-1.  In the Google Cloud Console, go to "IAM & Admin" > "Service Accounts".
-2.  Create a new service account.
-3.  Grant it the "Document AI API User" role.
-4.  Create a JSON key for the service account and download it.
-5.  Copy the entire content of the downloaded JSON file and paste it as the value for `GOOGLE_CREDENTIALS_JSON`.
-
----
-### How It Works
-
-_This README was generated with the assistance of Gemini Code Assist._
-1.  The user clicks "Import from PDF" on the dashboard and is taken to the `/contracts/import` page.
-2.  The user selects a PDF and clicks "Upload and Process".
-3.  The backend API (`/api/process-contract`) sends the file to the configured Google Document AI processor.
-4.  The API receives the extracted key-value pairs (e.g., "Polisa numer", "Całkowita składka").
-5.  The API maps these keys to the application's data model (e.g., `contract_number`, `contract_value`) and handles data parsing (e.g., extracting dates from a string).
-6.  The processed data is stored in the browser's `sessionStorage`.
-7.  The user is redirected to the `/contracts/new` page, where a script reads the data from `sessionStorage` and pre-fills the form fields.
