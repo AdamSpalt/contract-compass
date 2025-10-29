@@ -45,92 +45,49 @@
 	});
 </script>
 
-<main>
+<main class="new-contract-page">
+	<div class="back-links-container">
+		<a href="/" class="back-link">&larr; Back to Dashboard</a>
+	</div>
 	<h1>Import Contract from PDF</h1>
-	<a href="/" class="back-link">&larr; Back to Dashboard</a>
-
-	<p class="description">
-		Upload a contract PDF file. The system will use AI to parse the document and pre-fill the
-		contract creation form for you.
-	</p>
 
 	<form on:submit={handleSubmit} enctype="multipart/form-data">
+		<h4 class="form-section-heading">Upload Document</h4>
 		<div class="form-group">
-			<label for="contract_pdf">PDF File</label>
+			<label for="contract_pdf"
+				>Select a contract PDF file. The system will use AI to parse the document and pre-fill the
+				contract creation form for you.
+				<p></p>
+				<b>NOTE: This functionality is in the beta or 'preview' stage. Not all details may be collected.</b>
+				</label
+			>
 			<input
 				type="file"
 				id="contract_pdf"
 				name="contract_pdf"
-				accept=".pdf"
+				accept="application/pdf"
 				required
 				disabled={isLoading}
 				bind:this={fileInput}
 			/>
 		</div>
 
-		<button type="submit" disabled={isLoading}>
+		<button type="submit" class="button button-primary" disabled={isLoading}>
 			{#if isLoading}
 				Processing...
 			{:else}
 				Upload and Process
 			{/if}
 		</button>
-
-		{#if errorMessage}
-			<p class="error">Error: {errorMessage}</p>
-		{/if}
 	</form>
+	{#if errorMessage}
+		<p class="error">Error: {errorMessage}</p>
+	{/if}
 </main>
 
 <style>
-	main {
-		max-width: 1100px; /* Match the dashboard's max-width */
-		margin: 1rem auto;
-		padding: 1.5rem;
-	}
-	.back-link {
-		display: inline-block;
-		margin-bottom: 1.5rem;
-	}
-	.description {
-		margin-bottom: 2rem;
-		line-height: 1.6;
-		color: var(--color-text-secondary);
-	}
-	.form-group {
-		margin-bottom: 1.5rem;
-	}
-	label {
-		display: block;
-		margin-bottom: 0.5rem;
-		font-weight: 500;
-	}
-	input[type='file'] {
-		width: 100%;
-		padding: 0.75rem;
-		font-size: 1rem;
-		border: 1px solid var(--color-border);
-		border-radius: 4px;
-	}
-	button {
-		padding: 0.75rem 1.5rem;
-		background-color: var(--color-primary);
-		color: white;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 1.1rem;
-		font-weight: bold;
-		transition: background-color 0.2s;
-	}
-	button:disabled {
-		background-color: var(--color-primary);
-		cursor: not-allowed;
-		opacity: 0.6;
-	}
 	.error {
 		color: var(--color-danger);
 		margin-top: 1rem;
-		text-align: center;
 	}
 </style>
