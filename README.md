@@ -150,21 +150,12 @@ PUBLIC_SUPABASE_URL="your-supabase-project-url"
 PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 ```
 
-### AI Import Setup
-
-# Google Cloud Project ID
+```### AI Import Setup
 GOOGLE_PROJECT_ID="your-gcp-project-id"
-
-The application will be available at `http://localhost:5173`.
-# The location of your Document AI processor (e.g., "eu" or "us")
 GOOGLE_LOCATION="eu"
-
-## Building for Production
-# The specific ID of your Document AI Form Parser processor
 GOOGLE_PROCESSOR_ID="your-processor-id"
-
+```
 To create a production version of your app:
-
 ```bash
 npm run build
 
