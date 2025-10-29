@@ -4,8 +4,6 @@ Welcome to Contract Compass, a web application designed to help users manage and
 
 This project is built with a modern technology stack, making it fast, reliable, and easy to maintain.
 
-![Contract Compass Dashboard](./.github/images/dashboard-screenshot.png)
-
 ## Table of Contents
 
 - [Key Features](#key-features)
