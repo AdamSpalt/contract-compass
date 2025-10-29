@@ -117,8 +117,6 @@ Follow these instructions to get a local copy of the project up and running.
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
-- npm (or pnpm/yarn)
 *   Node.js (v18 or later)
 *   npm
 *   A Google Cloud Platform account with the Document AI API enabled.
@@ -200,14 +198,3 @@ You can preview the production build with `npm run preview`.
 4.  Create a JSON key for the service account and download it.
 5.  Copy the entire content of the downloaded JSON file and paste it as the value for `GOOGLE_CREDENTIALS_JSON`.
 
----
-### How It Works
-
-_This README was generated with the assistance of Gemini Code Assist._
-1.  The user clicks "Import from PDF" on the dashboard and is taken to the `/contracts/import` page.
-2.  The user selects a PDF and clicks "Upload and Process".
-3.  The backend API (`/api/process-contract`) sends the file to the configured Google Document AI processor.
-4.  The API receives the extracted key-value pairs (e.g., "Polisa numer", "Całkowita składka").
-5.  The API maps these keys to the application's data model (e.g., `contract_number`, `contract_value`) and handles data parsing (e.g., extracting dates from a string).
-6.  The processed data is stored in the browser's `sessionStorage`.
-7.  The user is redirected to the `/contracts/new` page, where a script reads the data from `sessionStorage` and pre-fills the form fields.
