@@ -96,7 +96,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     // Stare pola (prawdopodobnie zwrócą null, co jest OK)
     documentTitle: getEntity('contract_name'),
-    vendor: getEntity('vendor_name'),
+    vendor: getEntity(['vendor_name', 'Ubezpieczający', 'Ubezpieczyciel','na rzecz']),
     startDate: getEntity('start_date'),
     endDate: getEntity('end_date'),
     value: getEntity('contract_value'),
@@ -127,6 +127,7 @@ export const POST: RequestHandler = async ({ request }) => {
         // The keys in this object MUST match the variable names in `routes/contracts/new/+page.svelte`
         const mappedData = {
             // --- Primary Fields ---
+            vendor_name: extractedData.vendor,
             start_date: startDate,
             end_date: endDate,
             contract_number: extractedData.contractNumber,
