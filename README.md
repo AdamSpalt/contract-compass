@@ -28,12 +28,14 @@ This project is built with a modern technology stack, making it fast, reliable, 
 - **Sorted by Expiration**: Contracts are automatically sorted by their end date, allowing you to easily see which ones require attention soon.
 - **Secure File Handling**: Upload and securely access contract documents.
 - **Automated Email Reminders**: Automatically sends email notifications 30, 14, and 7 days before a contract's end date to ensure timely renewals.
-- **AI-Powered PDF Import**: Automatically extract data from PDF contracts to pre-fill new contract forms using Google Document AI.
+- **AI-Powered PDF Import (Temporarily Disabled)**: A feature to automatically extract data from PDF contracts using Google Document AI. This feature is currently under review.
 - **Scalable Backend**: Built on Supabase for robust data management and authentication.
 
 ## AI-Powered PDF Import
 
-This feature allows users to upload a contract in PDF format. The system uses Google Cloud Document AI to parse the document, extract key-value pairs, and automatically pre-fill the "Add New Contract" form, saving significant manual entry time.
+**Note: This feature is temporarily disabled.** The initial implementation used Google Cloud's pre-trained Form Parser. While powerful, the results were not consistently accurate enough across different contract layouts to provide a reliable user experience. The generic nature of the AI's response required significant custom mapping and data transformation logic. Due to these limitations, the feature has been paused pending further review and potential use of a custom-trained model.
+
+The feature was designed to allow users to upload a contract in PDF format, have the system parse it using AI, and automatically pre-fill the "Add New Contract" form.
 
 ### How It Works
 
